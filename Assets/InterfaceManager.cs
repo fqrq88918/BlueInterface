@@ -14,13 +14,13 @@ public class InterfaceManager : MonoBehaviour {
 	void Start () 
 	{
 		//StartCoroutine (PostUnityWeb ());
-		StartCoroutine(PostImage());
+		StartCoroutine(GetDetail());
 	}
-	
+
 	// Update is called once per frame
 	void Update () 
 	{
-		
+
 	}
 
 	private byte[] FileContent(string filePath)
@@ -49,31 +49,31 @@ public class InterfaceManager : MonoBehaviour {
 		}
 	}  
 
-//	IEnumerator PostLogin()
-//	{
-//		//表单
-//		WWWForm form = new WWWForm();
-////		form.AddField("phone", "13813829757");
-////		form.AddField("sms_code", "1234");
-////		form.AddField("password", "88888888");
-////		form.AddField("name", "lm");
-//
-//		form.AddField("UserName","test1");
-//		form.AddField ("PassWord", "777");
-//
-//		WWW www = new WWW(url, form);
-//
-//		yield return www;
-//
-//		if (www.error != null)
-//		{
-//			print("php请求错误: 代码为" + www.error);
-//		}
-//		else
-//		{
-//			print("php请求成功" + www.text);
-//		}
-//	}
+	//	IEnumerator PostLogin()
+	//	{
+	//		string url = "http://62.234.108.219/User/login";
+	//		//表单
+	//		WWWForm form = new WWWForm();
+	//		form.AddField("phone", "13813829757");
+	//		form.AddField("sms_code", "1234");
+	//		form.AddField("password", "88888888");
+	//		form.AddField("name", "lm");
+	//
+	//
+	//
+	//		WWW www = new WWW(url, form);
+	//
+	//		yield return www;
+	//
+	//		if (www.error != null)
+	//		{
+	//			print("php请求错误: 代码为" + www.error);
+	//		}
+	//		else
+	//		{
+	//			print("php请求成功" + www.text);
+	//		}
+	//	}
 
 	IEnumerator PostUnityWeb()
 	{
@@ -86,8 +86,8 @@ public class InterfaceManager : MonoBehaviour {
 		form.AddField("password", "88888888");
 		form.AddField("name", "lm222");
 
-//		form.AddField("UserName","李梦");
-//		form.AddField ("PassWord", "777");
+		//		form.AddField("UserName","李梦");
+		//		form.AddField ("PassWord", "777");
 
 		UnityWebRequest www = UnityWebRequest.Post (url, form);
 
@@ -100,9 +100,9 @@ public class InterfaceManager : MonoBehaviour {
 		}
 		else
 		{
-			
 
-				print(www.downloadHandler.text);
+
+			print(www.downloadHandler.text);
 
 		}
 
@@ -138,16 +138,19 @@ public class InterfaceManager : MonoBehaviour {
 		}
 	}
 
-	IEnumerator CreateForum()
+	IEnumerator SetArea()
 	{
-		string url = "http://62.234.108.219/Forum/create";
+		string url = "http://62.234.108.219/User/setArea";
+
 		Dictionary<string,string> header = new Dictionary<string, string>();
 		header.Add ("OSTOKEN", "yxDRVobKtMYzKN7q");
-		string data = "cat_id=1&title=测试&content=内容&upload_images="+postImage.EncodeToJPG().ToString();
+
+		//form.AddField ("role_id", "1");
+		string data = "area_id=1";
 		byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
-//		WWWForm form = new WWWForm();
-	
-		WWW _www = new WWW(url, bs, header);
+		WWW _www = new WWW(url, bs,header);
+		//UnityWebRequest www = UnityWebRequest.Post(url, form,header);
+
 		yield return _www;
 
 		if (!_www.isDone)
@@ -164,20 +167,69 @@ public class InterfaceManager : MonoBehaviour {
 		}
 	}
 
+	IEnumerator CreateForum()
+	{
+		string url = "http://62.234.108.219/Forum/create";
+		Dictionary<string,string> header = new Dictionary<string, string>();
+		header.Add ("OSTOKEN", "yxDRVobKtMYzKN7q");
+		string data = "cat_id=1&title=测试&content=内容&upload_images[]=http://cjl.milinshiguang.com/911834531.jpg&upload_images[]=http://cjl.milinshiguang.com/912241865.jpg";
+		byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
+		//		WWWForm form = new WWWForm();
+
+		WWW _www = new WWW(url, bs, header);
+		yield return _www;
+
+		if (!_www.isDone)
+		{
+
+			yield return  _www.error;
+		}
+		else
+		{
+
+
+			print(_www.text);
+
+		}
+	}
+	//http://cjl.milinshiguang.com/911834531.jpg
+	//http://cjl.milinshiguang.com/912241865.jpg
 	IEnumerator PostImage()
 	{
 		string url = "http://62.234.108.219/UserUpload/upLoadImg";
 		string filePath = Application.dataPath + "/1.jpg";
+
+		WWWForm form = new WWWForm();
+		form.AddField ("OSTOKEN", "yxDRVobKtMYzKN7q");
+		form.AddBinaryData("tempImg",FileContent(filePath),"1.jpg","image/jpg");
+
+		WWW _www = new WWW(url,form);
+		yield return _www;
+
+		if (!_www.isDone)
+		{
+
+			yield return  _www.error;
+		}
+		else
+		{
+
+
+			print(_www.text);
+
+		}
+	}
+
+	IEnumerator GetDetail()
+	{
+		string url = "http://62.234.108.219/Forum/getDetail";
 		Dictionary<string,string> header = new Dictionary<string, string>();
 		header.Add ("OSTOKEN", "yxDRVobKtMYzKN7q");
-		string data = "tempImg=";
-		//Debug.Log (data);
-		byte[] bs1 = System.Text.UTF8Encoding.UTF8.GetBytes(data);
-		byte[] bs2 = FileContent (filePath);
-		byte[] bsAll = bs1.Concat (bs2).ToArray ();
-		//WWWForm form = new WWWForm();
-		//form.AddBinaryData("tempImg",FileContent(filePath),"1.jpg");
-		WWW _www = new WWW(url, bsAll,header);
+
+		//form.AddField ("role_id", "1");
+		string data = "forum_id=12";
+		byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
+		WWW _www = new WWW(url, bs,header);
 		yield return _www;
 
 		if (!_www.isDone)
