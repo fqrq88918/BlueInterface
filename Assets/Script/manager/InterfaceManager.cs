@@ -94,7 +94,7 @@ public class NetworkManager : MonoBehaviour {
     }
 
 
-
+    #region 注册登录模块
 
     /// <summary>
     /// 注册
@@ -172,6 +172,138 @@ public class NetworkManager : MonoBehaviour {
     }
 
     /// <summary>
+    /// 选择身份
+    /// </summary>
+    /// <param name="roleId"></param>
+    public void SetRole(string roleId)
+    {
+        string url = "http://62.234.108.219/User/setRole";
+        string data = "role_id=" + roleId;
+        StartCoroutine(Post(url, data, OnSetRole));
+
+    }
+
+    /// <summary>
+    ///选择身份回调
+    /// </summary>
+    /// <param name="result"></param>
+    private void OnSetRole(JsonData result)
+    { }
+
+    /// <summary>
+    /// 选择区域
+    /// </summary>
+    /// <param name="areaid"></param>
+    public void SetArea(string areaid)
+    {
+        string url = "http://62.234.108.219/User/setArea";
+        string data = "area_id=" + areaid;
+        StartCoroutine(Post(url, data, OnSetArea));
+    }
+
+    /// <summary>
+    /// 选择区域回调
+    /// </summary>
+    /// <param name="result"></param>
+    private void OnSetArea(JsonData result)
+    { }
+
+    /// <summary>
+    /// 获取短信验证码
+    /// </summary>
+    /// <param name="phone">手机号</param>
+    /// <param name="type">类型，1-注册，2-登录 ，3改密码</param>
+    public void getSmsCode(string phone, int type)
+    {
+        string url = "http://62.234.108.219/User/getSmsCode";
+        string data = "phone=" + phone+"&type="+type;
+        StartCoroutine(Post(url, data, OnGetSmsCode));
+    }
+
+    /// <summary>
+    /// 获取短信验证码结果
+    /// </summary>
+    /// <param name="result"></param>
+    private void OnGetSmsCode(JsonData result)
+    {
+    }
+
+    #endregion
+
+    #region 预约模块
+    /// <summary>
+    /// 发起预约
+    /// </summary>
+    /// <param name="areaId">区域ID</param>
+    /// <param name="type">预约类型</param>
+    /// <param name="community">小区</param>
+    /// <param name="address">地址</param>
+    /// <param name="name">业主姓名</param>
+    /// <param name="phone">业主电话</param>
+    /// <param name="time">预约上门时间</param>
+    /// <param name="remark">备注</param>
+    public void CreateAppoiment(string areaId,string type,string community,string address,string name,string phone,string time,string remark)
+    {
+        string url = "http://62.234.108.219/Appointment/create";
+        string data = " area_id=" + areaId + "&type=" + type + "&community=" + community + "&address=" + address + "&name=" + name + "&phone=" + phone + "&time=" + time + "&remark=" + remark;
+        StartCoroutine(Post(url, data, OnCreateAppointment));
+    }
+
+    /// <summary>
+    /// 预约结果回調
+    /// </summary>
+    /// <param name="result"></param>
+    public void OnCreateAppointment(JsonData result)
+    {
+    }
+
+    /// <summary>
+    /// 获取我的订单列表
+    /// </summary>
+    /// <param name="type">1为我预约的订单，2为我安装的订单</param>
+    /// <param name="status">0为全部，3为合格订单，4为不合格</param>
+    /// <param name="page">分页，页数</param>
+    /// <param name="pageCount">分页，每页条数，最大50</param>
+    /// <param name="lastTime">时间戳，精确到秒。上次获取时间，用于APP端上滑无刷新分页。若下拉整体刷新，此项勿传。</param>
+    /// <param name="searchOrderId">搜索条件，订单号，最小4位，最大15位</param>
+    public void GetAppointmentOrderList(string type,string status,string page,string pageCount,string lastTime,string searchOrderId)
+    {
+        string url = "http://62.234.108.219/Appointment/getOrderList";
+        string data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&last_time=" + lastTime + "&search[order_id]=" + searchOrderId ;
+        StartCoroutine(Post(url, data, OnGetAppointmentOrderList));
+    }
+
+    /// <summary>
+    /// 获取我的订单回调
+    /// </summary>
+    /// <param name="result"></param>
+    private void OnGetAppointmentOrderList(JsonData result)
+    {
+     
+    }
+
+    /// <summary>
+    /// 获取预约订单详情
+    /// </summary>
+    /// <param name="id">订单Id，不是订单号</param>
+    public void GetAppointmentDetail(string id)
+    {
+        string url = "http://62.234.108.219/Appointment/getDetail";
+        string data = " order_id=" + id ;
+        StartCoroutine(Post(url, data, OnGetAppointmentDetail));
+    }
+
+    /// <summary>
+    /// 获取预约订单详情回调
+    /// </summary>
+    /// <param name="result"></param>
+    public void OnGetAppointmentDetail(JsonData result)
+    { }
+
+
+    #endregion
+
+    /// <summary>
     /// 获取帖子详情
     /// </summary>
     public void GetDetail(string forunid)
@@ -186,42 +318,7 @@ public class NetworkManager : MonoBehaviour {
         EventManager.instance.NotifyEvent(Event.GetDetail);
     }
 
-    /// <summary>
-    /// 设置角色
-    /// </summary>
-    /// <param name="roleId"></param>
-    public void SetRole(string roleId)
-    {
-        string url = "http://62.234.108.219/User/setRole";
-        string data = "role_id="+ roleId;
-        StartCoroutine(Post(url, data, OnSetRole));
-
-    }
-
-    /// <summary>
-    /// 设置角色回调
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnSetRole(JsonData result)
-    { }
-
-    /// <summary>
-    /// 设置区域
-    /// </summary>
-    /// <param name="areaid"></param>
-    public void SetArea(string areaid)
-    {
-        string url = "http://62.234.108.219/User/setArea";
-        string data = "area_id="+areaid;
-        StartCoroutine(Post(url, data, OnSetArea));
-    }
-
-    /// <summary>
-    /// 设置区域回调
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnSetArea(JsonData result)
-    { }
+    
 
     /// <summary>
     /// 发帖
@@ -244,6 +341,4 @@ public class NetworkManager : MonoBehaviour {
     private void OnCreateForum(JsonData result)
     {
     }
-
-
 }
