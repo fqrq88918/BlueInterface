@@ -4,7 +4,8 @@ using UnityEngine;
 using LitJson;
 using System.IO;
 
-public class InterfaceManager : MonoBehaviour {
+public class InterfaceManager : MonoBehaviour
+{
     IEnumerator Post(string url, string data, System.Action<JsonData> callback = null)
     {
         Dictionary<string, string> headers = new Dictionary<string, string>();
@@ -38,10 +39,6 @@ public class InterfaceManager : MonoBehaviour {
             {
                 JsonData jobject = JsonMapper.ToObject(www.text);
                 callback(jobject);
-                //if (int.Parse(jobject["status"].ToString()) == 1)
-                //{
-                //    callback(jobject["data"]);
-                //}
             }
         }
     }
@@ -135,23 +132,23 @@ public class InterfaceManager : MonoBehaviour {
         int status = int.Parse(result["status"].ToString());
         if (status != 1)
         {
-            EventManager.instance.NotifyEvent(Event.Regist,false);
+            EventManager.instance.NotifyEvent(Event.Regist, false);
             Debug.LogError("OnRegister >>>>error status:" + status);
             return;
         }
         result = result["data"];
         if (result == null)
             return;
-        UserData.instance.id =int.Parse(result["id"].ToString());
+        UserData.instance.id = int.Parse(result["id"].ToString());
         UserData.instance.name = result["name"].ToString();
         UserData.instance.phone = result["phone"].ToString();
-        UserData.instance.role =int.Parse(result["role"].ToString());
-        UserData.instance.area =int.Parse(result["area"].ToString());
+        UserData.instance.role = int.Parse(result["role"].ToString());
+        UserData.instance.area = int.Parse(result["area"].ToString());
         UserData.instance.avatar = result["avatar"].ToString();
-        UserData.instance.coin =int.Parse(result["coin"].ToString());
-        UserData.instance.point =int.Parse(result["point"].ToString());
+        UserData.instance.coin = int.Parse(result["coin"].ToString());
+        UserData.instance.point = int.Parse(result["point"].ToString());
         UserData.instance.token = result["token"].ToString();
-        EventManager.instance.NotifyEvent(Event.Regist,true);
+        EventManager.instance.NotifyEvent(Event.Regist, true);
     }
 
     /// <summary>
@@ -180,18 +177,18 @@ public class InterfaceManager : MonoBehaviour {
         result = result["data"];
         if (result == null)
             return;
-        UserData.instance.id = int.Parse( result["id"].ToString());
+        UserData.instance.id = int.Parse(result["id"].ToString());
         UserData.instance.name = result["name"].ToString();
         UserData.instance.phone = result["phone"].ToString();
-        UserData.instance.role =int.Parse(result["role"].ToString());
-        UserData.instance.area =int.Parse(result["area"].ToString());
+        UserData.instance.role = int.Parse(result["role"].ToString());
+        UserData.instance.area = int.Parse(result["area"].ToString());
         UserData.instance.avatar = result["avatar"].ToString();
-        UserData.instance.coin =int.Parse(result["coin"].ToString());
-        UserData.instance.point =int.Parse(result["point"].ToString());
+        UserData.instance.coin = int.Parse(result["coin"].ToString());
+        UserData.instance.point = int.Parse(result["point"].ToString());
         UserData.instance.token = result["token"].ToString();
-        UserData.instance.level =int.Parse(result[" level"].ToString());
-        UserData.instance.totalSign =int.Parse(result[" totalSign"].ToString());
-        EventManager.instance.NotifyEvent(Event.Login,true);
+        UserData.instance.level = int.Parse(result[" level"].ToString());
+        UserData.instance.totalSign = int.Parse(result[" totalSign"].ToString());
+        EventManager.instance.NotifyEvent(Event.Login, true);
     }
 
     /// <summary>
@@ -215,13 +212,13 @@ public class InterfaceManager : MonoBehaviour {
         int status = int.Parse(result["status"].ToString());
         if (status != 1)
         {
-            EventManager.instance.NotifyEvent(Event.SetRole,false);
+            EventManager.instance.NotifyEvent(Event.SetRole, false);
             Debug.LogError("OnSetRole >>>>error status:" + status);
             return;
         }
 
         UserData.instance.role = DataManager.instance.selectRoleID;
-        EventManager.instance.NotifyEvent(Event.SetRole,true);
+        EventManager.instance.NotifyEvent(Event.SetRole, true);
     }
 
     /// <summary>
@@ -246,11 +243,11 @@ public class InterfaceManager : MonoBehaviour {
         if (status != 1)
         {
             Debug.LogError("OnSetArea >>>>error status:" + status);
-            EventManager.instance.NotifyEvent(Event.SetArea,false);
+            EventManager.instance.NotifyEvent(Event.SetArea, false);
             return;
-        }       
+        }
         UserData.instance.area = DataManager.instance.selectAreaID;
-        EventManager.instance.NotifyEvent(Event.SetArea,true);
+        EventManager.instance.NotifyEvent(Event.SetArea, true);
     }
 
     /// <summary>
@@ -326,21 +323,21 @@ public class InterfaceManager : MonoBehaviour {
     /// <param name="page">分页，页数</param>
     /// <param name="pageCount">分页，每页条数，最大50</param>   
     /// <param name="searchOrderId">搜索条件，订单号，最小4位，最大15位</param>
-    public void GetAppointmentOrderList(int type, int status, int page, int pageCount,  string searchOrderId)
+    public void GetAppointmentOrderList(int type, int status, int page, int pageCount, string searchOrderId)
     {
         string url = "http://62.234.108.219/Appointment/getOrderList";
         string lastTime = "";
         //只有在首页的时候才会刷新上次请求的时间戳
         if (page == 0)
         {
-            DataManager.instance.orderList_lastTime =int.Parse((System.DateTime.Now.Ticks/ 10000000).ToString());
+            DataManager.instance.orderList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
         }
         else
         {
             lastTime = DataManager.instance.orderList_lastTime.ToString();
         }
 
-      
+
         string data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&last_time=" + lastTime + "&search[order_id]=" + searchOrderId;
         StartCoroutine(Post(url, data, OnGetAppointmentOrderList));
     }
@@ -351,7 +348,15 @@ public class InterfaceManager : MonoBehaviour {
     /// <param name="result"></param>
     private void OnGetAppointmentOrderList(JsonData result)
     {
+        int status = int.Parse(result["status"].ToString());
+        if (status != 1)
+        {
+            EventManager.instance.NotifyEvent(Event.GetAppointmentList, false);
+            Debug.LogError("OnGetAppointmentOrderList >>>>error status:" + status);
+            return;
+        }
 
+        EventManager.instance.NotifyEvent(Event.GetAppointmentList, true);
     }
 
     /// <summary>
@@ -435,7 +440,7 @@ public class InterfaceManager : MonoBehaviour {
     /// </summary>
     public void GetUserPoint()
     {
-        if (UserData.instance.role == 1||UserData.instance.role==2)
+        if (UserData.instance.role == 1 || UserData.instance.role == 2)
             return;
 
         string url = "http://62.234.108.219/User/getPoint";
@@ -483,7 +488,7 @@ public class InterfaceManager : MonoBehaviour {
     /// </summary>
     public void GetLevel()
     {
-        if (UserData.instance.role == 1 || UserData.instance.role ==2)
+        if (UserData.instance.role == 1 || UserData.instance.role == 2)
             return;
 
         string url = "http://62.234.108.219/User/getLevel";
@@ -495,7 +500,7 @@ public class InterfaceManager : MonoBehaviour {
     /// 返回等级
     /// </summary>
     /// <param name="result"></param>
-    private  void OnGetLevel(JsonData result)
+    private void OnGetLevel(JsonData result)
     { }
 
     /// <summary>
@@ -504,7 +509,7 @@ public class InterfaceManager : MonoBehaviour {
     /// <param name="type"></param>
     /// <param name="curPage"></param>
     /// <param name="pageCount"></param>
-    public void GetCircleList(int type,int curPage,int pageCount)
+    public void GetCircleList(int type, int curPage, int pageCount)
     {
         string url = "http://62.234.108.219/Forum/getCircleList";
         string data = "type=" + type + "&page=" + curPage + "&page_count=" + pageCount;
@@ -521,7 +526,7 @@ public class InterfaceManager : MonoBehaviour {
     /// <summary>
     /// 发帖
     /// </summary>
-    public void CreateForum(string catid,string title,string content,string[]imgArray)
+    public void CreateForum(string catid, string title, string content, string[] imgArray)
     {
         string url = "http://62.234.108.219/Forum/create";
         string data = "cat_id=" + catid + "&title=" + title + "&content=" + content;
