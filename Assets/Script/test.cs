@@ -13,6 +13,7 @@ public class test : MonoBehaviour {
         registerBtn.onClick = register;
         loginBtn.onClick = login;
 
+        EventManager.instance.RegisterEvent(Event.Login, OnLogin);
     }
 	
 	// Update is called once per frame
@@ -22,13 +23,20 @@ public class test : MonoBehaviour {
 
     void register(GameObject go, PointerEventData eventdata)
     {
-        Debug.Log("click");    
-        GameObject.Find("Camera").GetComponent<NetworkManager>().Register("11223344556","8888","123456","maple");
+        Debug.Log("click regist");    
+        GameObject.Find("Camera").GetComponent<InterfaceManager>().Register("11223344556","8888","123456","maple");
     }
 
     void login(GameObject go, PointerEventData eventdata)
     {
-        Debug.Log("click");
-        GameObject.Find("Camera").GetComponent<NetworkManager>().Login(1, "13000000014", "123456", "8888");
+        Debug.Log("click login");
+        GameObject.Find("Camera").GetComponent<InterfaceManager>().Login(1, "11223344556", "123456", "8888");
+    }
+
+
+    void OnLogin(object[] data)
+    {
+        Debug.Log("login result");
+        Debug.Log(data[0]);
     }
 }
