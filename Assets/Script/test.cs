@@ -29,6 +29,8 @@ public class test : MonoBehaviour {
 
     void login(GameObject go, PointerEventData eventdata)
     {
+        //Debug.Log(System.DateTime.Now.Ticks/10000000);
+        //return;
         Debug.Log("click login");
         GameObject.Find("Camera").GetComponent<InterfaceManager>().Login(1, "11223344556", "123456", "8888");
     }

@@ -8,18 +8,24 @@ public class InterfaceManager : MonoBehaviour {
     IEnumerator Post(string url, string data, System.Action<JsonData> callback = null)
     {
         Dictionary<string, string> headers = new Dictionary<string, string>();
-        headers["Content-Type"] = "application/x-www-form-urlencoded";
+        WWW www;
+        byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
+
         if (UserData.instance.token != "")
         {
             print("加入了token");
+            headers["Content-Type"] = "application/x-www-form-urlencoded";
             headers["OSTOKEN"] = UserData.instance.token;
+            www = new WWW(url, bs, headers);
         }
-        byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
+        else
+        {
+            www = new WWW(url, bs);
+        }
 
         Debug.Log("url:" + url);
         Debug.Log("data:" + data);
 
-        WWW www = new WWW(url, bs, headers);
         yield return www;
         if (www.error != null)
         {
@@ -324,15 +330,17 @@ public class InterfaceManager : MonoBehaviour {
     {
         string url = "http://62.234.108.219/Appointment/getOrderList";
         string lastTime = "";
+        //只有在首页的时候才会刷新上次请求的时间戳
         if (page == 0)
         {
-            DataManager.instance.orderList_lastTime = 0;
-        }    
-
-        if (DataManager.instance.orderList_lastTime != 0)
-        {
-             lastTime = DataManager.instance.orderList_lastTime.ToString();
+            DataManager.instance.orderList_lastTime =int.Parse((System.DateTime.Now.Ticks/ 10000000).ToString());
         }
+        else
+        {
+            lastTime = DataManager.instance.orderList_lastTime.ToString();
+        }
+
+      
         string data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&last_time=" + lastTime + "&search[order_id]=" + searchOrderId;
         StartCoroutine(Post(url, data, OnGetAppointmentOrderList));
     }
