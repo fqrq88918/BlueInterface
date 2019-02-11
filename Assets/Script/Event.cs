@@ -11,4 +11,5 @@ public enum Event  {
     GetSmsCode=6,
     CreateAppointment=7,
     GetAppointmentList=8,
+    GetAppointmentGetList=9,
 }

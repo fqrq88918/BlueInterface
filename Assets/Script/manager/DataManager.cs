@@ -13,4 +13,6 @@ public class DataManager : Singleton<DataManager> {
     public int selectAreaID = 0;
 
     public int orderList_lastTime = 0;
+
+
 }

@@ -355,8 +355,78 @@ public class InterfaceManager : MonoBehaviour
             Debug.LogError("OnGetAppointmentOrderList >>>>error status:" + status);
             return;
         }
+        result = result["data"];
+        if (result == null)
+            return;
 
-        EventManager.instance.NotifyEvent(Event.GetAppointmentList, true);
+        JsonData data = result["list"];
+        List<Order> resultList = new List<Order>();
+        for (int i = 0; i < data.Count; i++)
+        {
+            Order order = new Order();
+            order.id = data[i]["id"].ToString();
+            order.orderId = data[i]["order_id"].ToString();
+            order.areaId = data[i]["area_id"].ToString();
+            order.userId = data[i]["user_id"].ToString();
+            //order.userName = data[i]["user_name"].ToString();
+            //order.userPhone = data[i]["user_phone"].ToString();
+            order.userName = "";
+            order.userPhone = "";
+            order.type = data[i]["a_type"].ToString();
+            order.community = data[i]["a_community"].ToString();
+            order.address = data[i]["a_address"].ToString();
+            order.name = data[i]["a_name"].ToString();
+            order.phone = data[i]["a_phone"].ToString();
+            order.time = data[i]["a_time"].ToString();
+            order.remark = data[i]["a_remark"].ToString();
+            order.adminId = data[i]["b_admin_id"].ToString();
+            order.testerId = data[i]["b_tester_id"].ToString();
+            order.adminCreateTime = data[i]["b_create_time"].ToString();
+            order.entrancePic = data[i]["c_pic_entrance"].ToString();
+            order.testPic = data[i]["c_pic_test"].ToString();
+            order.roomPic = data[i]["c_pic_room"].ToString();
+            order.bedroomPic = data[i]["c_pic_bedroom"].ToString();
+            order.toiletPic = data[i]["c_pic_toilet"].ToString();
+            order.kitchenPic = data[i]["c_pic_kitchen"].ToString();
+            order.balconyPic = data[i]["c_pic_balcony"].ToString();
+            order.corridorPic = data[i]["c_pic_corridor"].ToString();
+            order.buildId = data[i]["c_build_id"].ToString();
+            order.buildName = data[i]["c_build_name"].ToString();
+            order.buildPhone = data[i]["c_build_phone"].ToString();
+            order.testBuyPlace = data[i]["c_test_buy_place"].ToString();
+            order.testHouseType = data[i]["c_test_house_type"].ToString();
+            order.testKitchenType = data[i]["c_test_kitchen_type"].ToString();
+            order.testToiletType = data[i]["c_test_toilet_type"].ToString();
+            order.testDeveloper = data[i]["c_test_developer"].ToString();
+            order.testDecoration = data[i]["c_test_decoration"].ToString();
+            order.testHvac = data[i]["c_test_hvac"].ToString();
+            order.testAir = data[i]["c_test_air"].ToString();
+            order.testProductType = data[i]["c_test_product_type"].ToString();
+            order.testLength = data[i]["c_test_length"].ToString();
+            order.testLayingType = data[i]["c_test_laying_type"].ToString();
+            order.testPipeline = data[i]["c_test_pipeline"].ToString();
+            order.testRemark = data[i]["c_test_remark"].ToString();
+            order.testAssess = data[i]["c_test_assess"].ToString();
+            order.testCompress = data[i]["c_test_compress"].ToString();
+            order.testWeld = data[i]["c_test_weld"].ToString();
+            order.testWeldCheck = data[i]["c_test_weld_check"].ToString();
+            order.testKeepStart = data[i]["c_test_kepp_start"].ToString();
+            order.testKeepEnd = data[i]["c_test_kepp_end"].ToString();
+            order.testOperatePressure = data[i]["c_test_operate_pressure"].ToString();
+            order.testCheckPressure = data[i]["c_test_check_pressure"].ToString();
+            order.testUserId = data[i]["c_test_user_id"].ToString();
+            order.testUserName = data[i]["c_test_user_name"].ToString();
+            order.testUserPhone = data[i]["c_test_user_phone"].ToString();
+            order.testNotice = data[i]["c_test_notice"].ToString();
+            order.testCreateTime = data[i]["c_create_time"].ToString();
+            order.testSimpleTime = data[i]["c_test_simple_time"].ToString();
+            order.orderStatus = data[i]["order_status"].ToString();
+            order.createTime = data[i]["create_time"].ToString();
+
+            resultList.Add(order);
+        }
+
+        EventManager.instance.NotifyEvent(Event.GetAppointmentList, resultList);
     }
 
     /// <summary>
@@ -375,7 +445,77 @@ public class InterfaceManager : MonoBehaviour
     /// </summary>
     /// <param name="result"></param>
     public void OnGetAppointmentDetail(JsonData result)
-    { }
+    {
+        int status = int.Parse(result["status"].ToString());
+        if (status != 1)
+        {
+            EventManager.instance.NotifyEvent(Event.GetAppointmentGetList, false);
+            Debug.LogError("OnGetAppointmentDetail >>>>error status:" + status);
+            return;
+        }
+        result = result["data"];
+        if (result == null)
+            return;
+        Order order = new Order();
+        order.id = result["id"].ToString();
+        order.orderId = result["order_id"].ToString();
+        order.areaId = result["area_id"].ToString();
+        order.userId = result["user_id"].ToString();
+        order.userName = result["user_name"].ToString();
+        order.userPhone = result["user_phone"].ToString();
+        order.type = result["a_type"].ToString();
+        order.community = result["a_community"].ToString();
+        order.address = result["a_address"].ToString();
+        order.name = result["a_name"].ToString();
+        order.phone = result["a_phone"].ToString();
+        order.time = result["a_time"].ToString();
+        order.remark = result["a_remark"].ToString();
+        order.adminId = result["b_admin_id"].ToString();
+        order.testerId = result["b_tester_id"].ToString();
+        order.adminCreateTime = result["b_create_time"].ToString();
+        order.entrancePic = result["c_pic_entrance"].ToString();
+        order.testPic = result["c_pic_test"].ToString();
+        order.roomPic = result["c_pic_room"].ToString();
+        order.bedroomPic = result["c_pic_bedroom"].ToString();
+        order.toiletPic = result["c_pic_toilet"].ToString();
+        order.kitchenPic = result["c_pic_kitchen"].ToString();
+        order.balconyPic = result["c_pic_balcony"].ToString();
+        order.corridorPic = result["c_pic_corridor"].ToString();
+        order.buildId = result["c_build_id"].ToString();
+        order.buildName = result["c_build_name"].ToString();
+        order.buildPhone = result["c_build_phone"].ToString();
+        order.testBuyPlace = result["c_test_buy_place"].ToString();
+        order.testHouseType = result["c_test_house_type"].ToString();
+        order.testKitchenType = result["c_test_kitchen_type"].ToString();
+        order.testToiletType = result["c_test_toilet_type"].ToString();
+        order.testDeveloper = result["c_test_developer"].ToString();
+        order.testDecoration = result["c_test_decoration"].ToString();
+        order.testHvac = result["c_test_hvac"].ToString();
+        order.testAir = result["c_test_air"].ToString();
+        order.testProductType = result["c_test_product_type"].ToString();
+        order.testLength = result["c_test_length"].ToString();
+        order.testLayingType = result["c_test_laying_type"].ToString();
+        order.testPipeline = result["c_test_pipeline"].ToString();
+        order.testRemark = result["c_test_remark"].ToString();
+        order.testAssess = result["c_test_assess"].ToString();
+        order.testCompress = result["c_test_compress"].ToString();
+        order.testWeld = result["c_test_weld"].ToString();
+        order.testWeldCheck = result["c_test_weld_check"].ToString();
+        order.testKeepStart = result["c_test_kepp_start"].ToString();
+        order.testKeepEnd = result["c_test_kepp_end"].ToString();
+        order.testOperatePressure = result["c_test_operate_pressure"].ToString();
+        order.testCheckPressure = result["c_test_check_pressure"].ToString();
+        order.testUserId = result["c_test_user_id"].ToString();
+        order.testUserName = result["c_test_user_name"].ToString();
+        order.testUserPhone = result["c_test_user_phone"].ToString();
+        order.testNotice = result["c_test_notice"].ToString();
+        order.testCreateTime = result["c_create_time"].ToString();
+        order.testSimpleTime = result["c_test_simple_time"].ToString();
+        order.orderStatus = result["order_status"].ToString();
+        order.createTime = result["create_time"].ToString();
+
+        EventManager.instance.NotifyEvent(Event.GetAppointmentGetList, order);
+    }
 
 
     #endregion
@@ -543,5 +683,6 @@ public class InterfaceManager : MonoBehaviour
     /// <param name="result"></param>
     private void OnCreateForum(JsonData result)
     {
+
     }
 }

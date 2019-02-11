@@ -16,6 +16,17 @@ public class Order  {
     /// 发布者ID
     /// </summary>
     public string userId;
+
+    /// <summary>
+    /// 发布者姓名
+    /// </summary>
+    public string userName;
+
+    /// <summary>
+    /// 发布者手机号
+    /// </summary>
+    public string userPhone;
+
     /// <summary>
     /// 预约类型ID
     /// </summary>
@@ -87,7 +98,7 @@ public class Order  {
     /// <summary>
     /// 走廊照片
     /// </summary>
-    public string carridorPic;
+    public string corridorPic;
     /// <summary>
     /// 安装者ID（非必）
     /// </summary>
