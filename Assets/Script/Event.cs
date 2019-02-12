@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace XMWorkspace
+{
 public enum Event  {
     Regist=1,
     Login=2,	
@@ -12,4 +14,5 @@ public enum Event  {
     CreateAppointment=7,
     GetAppointmentList=8,
     GetAppointmentGetList=9,
+}
 }

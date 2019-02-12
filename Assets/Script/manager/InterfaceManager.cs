@@ -4,6 +4,8 @@ using UnityEngine;
 using LitJson;
 using System.IO;
 
+namespace XMWorkspace
+{
 public class InterfaceManager : MonoBehaviour
 {
     IEnumerator Post(string url, string data, System.Action<JsonData> callback = null)
@@ -685,4 +687,5 @@ public class InterfaceManager : MonoBehaviour
     {
 
     }
+}
 }

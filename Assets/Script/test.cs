@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+namespace XMWorkspace
+{
 public class test : MonoBehaviour {
     public UIEventListener registerBtn;
     public UIEventListener loginBtn;
@@ -39,4 +41,5 @@ public class test : MonoBehaviour {
         Debug.Log("login result");
         Debug.Log(data[0]);
     }
+}
 }

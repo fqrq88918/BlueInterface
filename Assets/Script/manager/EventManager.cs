@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace XMWorkspace
+{
 public class EventManager : Singleton<EventManager> {
     private Dictionary<Event, List<System.Action<object[]>>> m_eventList = new Dictionary<Event, List<System.Action<object[]>>>();
 
@@ -41,4 +43,5 @@ public class EventManager : Singleton<EventManager> {
             }
         }
     }
+}
 }
