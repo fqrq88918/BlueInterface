@@ -6,686 +6,849 @@ using System.IO;
 
 namespace XMWorkspace
 {
-public class InterfaceManager : MonoBehaviour
-{
-    IEnumerator Post(string url, string data, System.Action<JsonData> callback = null)
+    public class InterfaceManager : MonoBehaviour
     {
-        Dictionary<string, string> headers = new Dictionary<string, string>();
-        WWW www;
-        byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
+        IEnumerator Post(string url, string data, System.Action<JsonData> callback = null)
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            WWW www;
+            byte[] bs = System.Text.UTF8Encoding.UTF8.GetBytes(data);
 
-        if (UserData.instance.token != "")
-        {
-            print("加入了token");
-            headers["Content-Type"] = "application/x-www-form-urlencoded";
-            headers["OSTOKEN"] = UserData.instance.token;
-            www = new WWW(url, bs, headers);
-        }
-        else
-        {
-            www = new WWW(url, bs);
-        }
-
-        Debug.Log("url:" + url);
-        Debug.Log("data:" + data);
-
-        yield return www;
-        if (www.error != null)
-        {
-            Debug.LogError(www.error);
-        }
-        else
-        {
-            Debug.Log(www.text);
-            if (callback != null)
+            if (UserData.instance.token != "")
             {
-                JsonData jobject = JsonMapper.ToObject(www.text);
-                callback(jobject);
+                print("加入了token");
+                headers["Content-Type"] = "application/x-www-form-urlencoded";
+                headers["OSTOKEN"] = UserData.instance.token;
+                www = new WWW(url, bs, headers);
+            }
+            else
+            {
+                www = new WWW(url, bs);
+            }
+
+            Debug.Log("url:" + url);
+            Debug.Log("data:" + data);
+
+            yield return www;
+            if (www.error != null)
+            {
+                Debug.LogError(www.error);
+            }
+            else
+            {
+                Debug.Log(www.text);
+                if (callback != null)
+                {
+                    JsonData jobject = JsonMapper.ToObject(www.text);
+                    callback(jobject);
+                }
             }
         }
-    }
-    private byte[] FileContent(string filePath)
-    {
-        FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        try
+        private byte[] FileContent(string filePath)
         {
-            byte[] buffur = new byte[fs.Length];
-            fs.Read(buffur, 0, (int)fs.Length);
-
-            return buffur;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.Log(ex.Message);
-            return null;
-        }
-        finally
-        {
-            if (fs != null)
+            FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            try
             {
-                //关闭资源  
-                fs.Close();
+                byte[] buffur = new byte[fs.Length];
+                fs.Read(buffur, 0, (int)fs.Length);
+
+                return buffur;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.Log(ex.Message);
+                return null;
+            }
+            finally
+            {
+                if (fs != null)
+                {
+                    //关闭资源  
+                    fs.Close();
+                }
             }
         }
-    }
 
-    /// <summary>
-    /// 上传图片到服务器
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <param name="callBack"></param>
-    /// <returns></returns>
-    IEnumerator PostImage(string filePath, string fileName, string mimeType, System.Action<JsonData> callBack = null)
-    {
-        string url = "http://62.234.108.219/UserUpload/upLoadImg";
-
-        WWWForm form = new WWWForm();
-        form.AddField("OSTOKEN", UserData.instance.token);
-        //  form.AddBinaryData("tempImg", FileContent(filePath), "1.jpg", "image/jpg");
-        form.AddBinaryData("tempImg", FileContent(filePath), fileName, mimeType);
-
-        WWW _www = new WWW(url, form);
-        yield return _www;
-
-        if (_www.error != null)
+        /// <summary>
+        /// 上传图片到服务器
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="callBack"></param>
+        /// <returns></returns>
+        IEnumerator PostImage(string filePath, string fileName, string mimeType, System.Action<JsonData> callBack = null)
         {
-            Debug.LogError(_www.error);
-            yield return _www.error;
-        }
-        else
-        {
-            print(_www.text);
-            if (callBack != null)
+            string url = "http://62.234.108.219/UserUpload/upLoadImg";
+
+            WWWForm form = new WWWForm();
+            form.AddField("OSTOKEN", UserData.instance.token);
+            //  form.AddBinaryData("tempImg", FileContent(filePath), "1.jpg", "image/jpg");
+            form.AddBinaryData("tempImg", FileContent(filePath), fileName, mimeType);
+
+            WWW _www = new WWW(url, form);
+            yield return _www;
+
+            if (_www.error != null)
             {
-                JsonData jobject = JsonMapper.ToObject(_www.text);
-                callBack(jobject);
+                Debug.LogError(_www.error);
+                yield return _www.error;
+            }
+            else
+            {
+                print(_www.text);
+                if (callBack != null)
+                {
+                    JsonData jobject = JsonMapper.ToObject(_www.text);
+                    callBack(jobject);
+                }
             }
         }
-    }
 
 
-    #region 注册登录模块
+        #region 注册登录模块
 
-    /// <summary>
-    /// 注册
-    /// </summary>
-    /// <param name="phone"></param>
-    /// <param name="code"></param>
-    /// <param name="password"></param>
-    /// <param name="name"></param>
-    /// <param name="invite"></param>
-    public void Register(string phone, string code, string password, string name, string invite = "")
-    {
-        string url = "http://62.234.108.219/User/register";
-
-
-        string data = "phone=" + phone +
-            "&code=" + code + "&password=" + password + "&name=" + name + "&invite=" + invite;
-
-        StartCoroutine(Post(url, data, OnRegister));
-    }
-
-    /// <summary>
-    /// 注册结果
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnRegister(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
+        /// <summary>
+        /// 注册
+        /// </summary>
+        /// <param name="phone"></param>
+        /// <param name="code"></param>
+        /// <param name="password"></param>
+        /// <param name="name"></param>
+        /// <param name="invite"></param>
+        public void Register(string phone, string code, string password, string name, string invite = "")
         {
-            EventManager.instance.NotifyEvent(Event.Regist, false);
-            Debug.LogError("OnRegister >>>>error status:" + status);
-            return;
-        }
-        result = result["data"];
-        if (result == null)
-            return;
-        UserData.instance.id = int.Parse(result["id"].ToString());
-        UserData.instance.name = result["name"].ToString();
-        UserData.instance.phone = result["phone"].ToString();
-        UserData.instance.role = int.Parse(result["role"].ToString());
-        UserData.instance.area = int.Parse(result["area"].ToString());
-        UserData.instance.avatar = result["avatar"].ToString();
-        UserData.instance.coin = int.Parse(result["coin"].ToString());
-        UserData.instance.point = int.Parse(result["point"].ToString());
-        UserData.instance.token = result["token"].ToString();
-        EventManager.instance.NotifyEvent(Event.Regist, true);
-    }
+            string url = "http://62.234.108.219/User/register";
 
-    /// <summary>
-    /// 登录
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="phone"></param>
-    /// <param name="password"></param>
-    /// <param name="code"></param>
-    public void Login(int type, string phone, string password = "", string code = "")
-    {
-        string url = "http://62.234.108.219/User/login";
-        string data = "type=" + type + "&phone=" + phone + "&password=" + password + "&code=" + code;
-        StartCoroutine(Post(url, data, OnLogin));
-    }
 
-    private void OnLogin(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
-        {
-            Debug.LogError("OnLogin >>>>error status:" + status);
-            EventManager.instance.NotifyEvent(Event.Login, false);
-            return;
-        }
-        result = result["data"];
-        if (result == null)
-            return;
-        UserData.instance.id = int.Parse(result["id"].ToString());
-        UserData.instance.name = result["name"].ToString();
-        UserData.instance.phone = result["phone"].ToString();
-        UserData.instance.role = int.Parse(result["role"].ToString());
-        UserData.instance.area = int.Parse(result["area"].ToString());
-        UserData.instance.avatar = result["avatar"].ToString();
-        UserData.instance.coin = int.Parse(result["coin"].ToString());
-        UserData.instance.point = int.Parse(result["point"].ToString());
-        UserData.instance.token = result["token"].ToString();
-        UserData.instance.level = int.Parse(result[" level"].ToString());
-        UserData.instance.totalSign = int.Parse(result[" totalSign"].ToString());
-        EventManager.instance.NotifyEvent(Event.Login, true);
-    }
+            string data = "phone=" + phone +
+                "&code=" + code + "&password=" + password + "&name=" + name + "&invite=" + invite;
 
-    /// <summary>
-    /// 选择身份
-    /// </summary>
-    /// <param name="roleId">1为“经销商”，2为“水工”，3为“试压员”</param>
-    public void SetRole(int roleId)
-    {
-        string url = "http://62.234.108.219/User/setRole";
-        string data = "role_id=" + roleId;
-        DataManager.instance.selectRoleID = roleId;
-        StartCoroutine(Post(url, data, OnSetRole));
-    }
-
-    /// <summary>
-    ///选择身份回调
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnSetRole(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
-        {
-            EventManager.instance.NotifyEvent(Event.SetRole, false);
-            Debug.LogError("OnSetRole >>>>error status:" + status);
-            return;
+            StartCoroutine(Post(url, data, OnRegister));
         }
 
-        UserData.instance.role = DataManager.instance.selectRoleID;
-        EventManager.instance.NotifyEvent(Event.SetRole, true);
-    }
-
-    /// <summary>
-    /// 选择区域
-    /// </summary>
-    /// <param name="areaid"></param>
-    public void SetArea(int areaid)
-    {
-        DataManager.instance.selectAreaID = areaid;
-        string url = "http://62.234.108.219/User/setArea";
-        string data = "area_id=" + areaid;
-        StartCoroutine(Post(url, data, OnSetArea));
-    }
-
-    /// <summary>
-    /// 选择区域回调
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnSetArea(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
+        /// <summary>
+        /// 注册结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnRegister(JsonData result)
         {
-            Debug.LogError("OnSetArea >>>>error status:" + status);
-            EventManager.instance.NotifyEvent(Event.SetArea, false);
-            return;
-        }
-        UserData.instance.area = DataManager.instance.selectAreaID;
-        EventManager.instance.NotifyEvent(Event.SetArea, true);
-    }
-
-    /// <summary>
-    /// 获取短信验证码
-    /// </summary>
-    /// <param name="phone">手机号</param>
-    /// <param name="type">类型，1-注册，2-登录 ，3改密码</param>
-    public void getSmsCode(string phone, int type)
-    {
-        string url = "http://62.234.108.219/User/getSmsCode";
-        string data = "phone=" + phone + "&type=" + type;
-        StartCoroutine(Post(url, data, OnGetSmsCode));
-    }
-
-    /// <summary>
-    /// 获取短信验证码结果
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnGetSmsCode(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
-        {
-            Debug.LogError("OnGetSmsCode >>>>error status:" + status);
-            EventManager.instance.NotifyEvent(Event.GetSmsCode, false);
-            return;
-        }
-        EventManager.instance.NotifyEvent(Event.GetSmsCode, true);
-    }
-
-    #endregion
-
-    #region 预约模块
-    /// <summary>
-    /// 发起预约
-    /// </summary>
-    /// <param name="areaId">区域ID</param>
-    /// <param name="type">预约类型</param>
-    /// <param name="community">小区</param>
-    /// <param name="address">地址</param>
-    /// <param name="name">业主姓名</param>
-    /// <param name="phone">业主电话</param>
-    /// <param name="time">预约上门时间</param>
-    /// <param name="remark">备注</param>
-    public void CreateAppoiment(string areaId, string type, string community, string address, string name, string phone, string time, string remark)
-    {
-        string url = "http://62.234.108.219/Appointment/create";
-        string data = " area_id=" + areaId + "&type=" + type + "&community=" + community + "&address=" + address + "&name=" + name + "&phone=" + phone + "&time=" + time + "&remark=" + remark;
-        StartCoroutine(Post(url, data, OnCreateAppointment));
-    }
-
-    /// <summary>
-    /// 预约结果回調
-    /// </summary>
-    /// <param name="result"></param>
-    public void OnCreateAppointment(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
-        {
-            EventManager.instance.NotifyEvent(Event.CreateAppointment, false);
-            Debug.LogError("OnCreateAppointment >>>>error status:" + status);
-            return;
-        }
-        EventManager.instance.NotifyEvent(Event.CreateAppointment, true);
-    }
-
-    /// <summary>
-    /// 获取我的订单列表
-    /// </summary>
-    /// <param name="type">1为我预约的订单，2为我安装的订单</param>
-    /// <param name="status">0为全部，3为合格订单，4为不合格</param>
-    /// <param name="page">分页，页数</param>
-    /// <param name="pageCount">分页，每页条数，最大50</param>   
-    /// <param name="searchOrderId">搜索条件，订单号，最小4位，最大15位</param>
-    public void GetAppointmentOrderList(int type, int status, int page, int pageCount, string searchOrderId)
-    {
-        string url = "http://62.234.108.219/Appointment/getOrderList";
-        string lastTime = "";
-        //只有在首页的时候才会刷新上次请求的时间戳
-        if (page == 0)
-        {
-            DataManager.instance.orderList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
-        }
-        else
-        {
-            lastTime = DataManager.instance.orderList_lastTime.ToString();
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.Regist, false);
+                Debug.LogError("OnRegister >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            UserData.instance.id = int.Parse(result["id"].ToString());
+            UserData.instance.name = result["name"].ToString();
+            UserData.instance.phone = result["phone"].ToString();
+            UserData.instance.role = int.Parse(result["role"].ToString());
+            UserData.instance.area = int.Parse(result["area"].ToString());
+            UserData.instance.avatar = result["avatar"].ToString();
+            UserData.instance.coin = int.Parse(result["coin"].ToString());
+            UserData.instance.point = int.Parse(result["point"].ToString());
+            UserData.instance.token = result["token"].ToString();
+            EventManager.instance.NotifyEvent(Event.Regist, true);
         }
 
-
-        string data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&last_time=" + lastTime + "&search[order_id]=" + searchOrderId;
-        StartCoroutine(Post(url, data, OnGetAppointmentOrderList));
-    }
-
-    /// <summary>
-    /// 获取我的订单回调
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnGetAppointmentOrderList(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
+        /// <summary>
+        /// 登录
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="phone"></param>
+        /// <param name="password"></param>
+        /// <param name="code"></param>
+        public void Login(int type, string phone, string password = "", string code = "")
         {
-            EventManager.instance.NotifyEvent(Event.GetAppointmentList, false);
-            Debug.LogError("OnGetAppointmentOrderList >>>>error status:" + status);
-            return;
+            string url = "http://62.234.108.219/User/login";
+            string data = "type=" + type + "&phone=" + phone + "&password=" + password + "&code=" + code;
+            StartCoroutine(Post(url, data, OnLogin));
         }
-        result = result["data"];
-        if (result == null)
-            return;
 
-        JsonData data = result["list"];
-        List<Order> resultList = new List<Order>();
-        for (int i = 0; i < data.Count; i++)
+        private void OnLogin(JsonData result)
         {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnLogin >>>>error status:" + status);
+                EventManager.instance.NotifyEvent(Event.Login, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            UserData.instance.id = int.Parse(result["id"].ToString());
+            UserData.instance.name = result["name"].ToString();
+            UserData.instance.phone = result["phone"].ToString();
+            UserData.instance.role = int.Parse(result["role"].ToString());
+            UserData.instance.area = int.Parse(result["area"].ToString());
+            UserData.instance.avatar = result["avatar"].ToString();
+            UserData.instance.coin = int.Parse(result["coin"].ToString());
+            UserData.instance.point = int.Parse(result["point"].ToString());
+            UserData.instance.token = result["token"].ToString();
+            UserData.instance.level = int.Parse(result["level"].ToString());
+            UserData.instance.totalSign = int.Parse(result[" totalSign"].ToString());
+            EventManager.instance.NotifyEvent(Event.Login, true);
+        }
+
+        /// <summary>
+        /// 选择身份
+        /// </summary>
+        /// <param name="roleId">1为“经销商”，2为“水工”，3为“试压员”</param>
+        public void SetRole(int roleId)
+        {
+            string url = "http://62.234.108.219/User/setRole";
+            string data = "role_id=" + roleId;
+            DataManager.instance.selectRoleID = roleId;
+            StartCoroutine(Post(url, data, OnSetRole));
+        }
+
+        /// <summary>
+        ///选择身份回调
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnSetRole(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.SetRole, false);
+                Debug.LogError("OnSetRole >>>>error status:" + status);
+                return;
+            }
+
+            UserData.instance.role = DataManager.instance.selectRoleID;
+            EventManager.instance.NotifyEvent(Event.SetRole, true, UserData.instance.role);
+        }
+
+        /// <summary>
+        /// 选择区域
+        /// </summary>
+        /// <param name="areaid"></param>
+        public void SetArea(int areaid)
+        {
+            DataManager.instance.selectAreaID = areaid;
+            string url = "http://62.234.108.219/User/setArea";
+            string data = "area_id=" + areaid;
+            StartCoroutine(Post(url, data, OnSetArea));
+        }
+
+        /// <summary>
+        /// 选择区域回调
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnSetArea(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnSetArea >>>>error status:" + status);
+                EventManager.instance.NotifyEvent(Event.SetArea, false);
+                return;
+            }
+            UserData.instance.area = DataManager.instance.selectAreaID;
+            EventManager.instance.NotifyEvent(Event.SetArea, true, UserData.instance.area);
+        }
+
+        /// <summary>
+        /// 获取短信验证码
+        /// </summary>
+        /// <param name="phone">手机号</param>
+        /// <param name="type">类型，1-注册，2-登录 ，3改密码</param>
+        public void getSmsCode(string phone, int type)
+        {
+            string url = "http://62.234.108.219/User/getSmsCode";
+            string data = "phone=" + phone + "&type=" + type;
+            StartCoroutine(Post(url, data, OnGetSmsCode));
+        }
+
+        /// <summary>
+        /// 获取短信验证码结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetSmsCode(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetSmsCode >>>>error status:" + status);
+                EventManager.instance.NotifyEvent(Event.GetSmsCode, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.GetSmsCode, true);
+        }
+
+        #endregion
+
+        #region 预约模块
+        /// <summary>
+        /// 发起预约
+        /// </summary>
+        /// <param name="areaId">区域ID</param>
+        /// <param name="type">预约类型</param>
+        /// <param name="community">小区</param>
+        /// <param name="address">地址</param>
+        /// <param name="name">业主姓名</param>
+        /// <param name="phone">业主电话</param>
+        /// <param name="time">预约上门时间</param>
+        /// <param name="remark">备注</param>
+        public void CreateAppoiment(string areaId, string type, string community, string address, string name, string phone, string time, string remark)
+        {
+            string url = "http://62.234.108.219/Appointment/create";
+            string data = " area_id=" + areaId + "&type=" + type + "&community=" + community + "&address=" + address + "&name=" + name + "&phone=" + phone + "&time=" + time + "&remark=" + remark;
+            StartCoroutine(Post(url, data, OnCreateAppointment));
+        }
+
+        /// <summary>
+        /// 预约结果回調
+        /// </summary>
+        /// <param name="result"></param>
+        public void OnCreateAppointment(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.CreateAppointment, false);
+                Debug.LogError("OnCreateAppointment >>>>error status:" + status);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.CreateAppointment, true);
+        }
+
+        /// <summary>
+        /// 获取我的订单列表
+        /// </summary>
+        /// <param name="type">1为我预约的订单，2为我安装的订单</param>
+        /// <param name="status">0为全部，3为合格订单，4为不合格</param>
+        /// <param name="page">分页，页数</param>
+        /// <param name="pageCount">分页，每页条数，最大50</param>   
+        /// <param name="searchOrderId">搜索条件，订单号，最小4位，最大15位</param>
+        public void GetAppointmentOrderList(int type, int status, int page, int pageCount, string searchOrderId)
+        {
+            string url = "http://62.234.108.219/Appointment/getOrderList";
+            string lastTime = "";
+            //只有在首页的时候才会刷新上次请求的时间戳
+            if (page == 0)
+            {
+                DataManager.instance.orderList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+            }
+            else
+            {
+                lastTime = DataManager.instance.orderList_lastTime.ToString();
+            }
+
+
+            string data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&last_time=" + lastTime + "&search[order_id]=" + searchOrderId;
+            StartCoroutine(Post(url, data, OnGetAppointmentOrderList));
+        }
+
+        /// <summary>
+        /// 获取我的订单回调
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetAppointmentOrderList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetAppointmentList, false);
+                Debug.LogError("OnGetAppointmentOrderList >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            int total =int.Parse( result["total"].ToString());
+            int page =int.Parse( result["page"].ToString());
+            int pageCount = int.Parse(result["page_count"].ToString());
+            JsonData data = result["list"];
+            List<Order> resultList = new List<Order>();
+            for (int i = 0; i < data.Count; i++)
+            {
+                Order order = new Order();
+                order.id = data[i]["id"].ToString();
+                order.orderId = data[i]["order_id"].ToString();
+                order.areaId = data[i]["area_id"].ToString();
+                order.userId = data[i]["user_id"].ToString();
+                //order.userName = data[i]["user_name"].ToString();
+                //order.userPhone = data[i]["user_phone"].ToString();
+                order.userName = "";
+                order.userPhone = "";
+                order.type = data[i]["a_type"].ToString();
+                order.community = data[i]["a_community"].ToString();
+                order.address = data[i]["a_address"].ToString();
+                order.name = data[i]["a_name"].ToString();
+                order.phone = data[i]["a_phone"].ToString();
+                order.time = data[i]["a_time"].ToString();
+                order.remark = data[i]["a_remark"].ToString();
+                order.adminId = data[i]["b_admin_id"].ToString();
+                order.testerId = data[i]["b_tester_id"].ToString();
+                order.adminCreateTime = data[i]["b_create_time"].ToString();
+                order.entrancePic = data[i]["c_pic_entrance"].ToString();
+                order.testPic = data[i]["c_pic_test"].ToString();
+                order.roomPic = data[i]["c_pic_room"].ToString();
+                order.bedroomPic = data[i]["c_pic_bedroom"].ToString();
+                order.toiletPic = data[i]["c_pic_toilet"].ToString();
+                order.kitchenPic = data[i]["c_pic_kitchen"].ToString();
+                order.balconyPic = data[i]["c_pic_balcony"].ToString();
+                order.corridorPic = data[i]["c_pic_corridor"].ToString();
+                order.buildId = data[i]["c_build_id"].ToString();
+                order.buildName = data[i]["c_build_name"].ToString();
+                order.buildPhone = data[i]["c_build_phone"].ToString();
+                order.testBuyPlace = data[i]["c_test_buy_place"].ToString();
+                order.testHouseType = data[i]["c_test_house_type"].ToString();
+                order.testKitchenType = data[i]["c_test_kitchen_type"].ToString();
+                order.testToiletType = data[i]["c_test_toilet_type"].ToString();
+                order.testDeveloper = data[i]["c_test_developer"].ToString();
+                order.testDecoration = data[i]["c_test_decoration"].ToString();
+                order.testHvac = data[i]["c_test_hvac"].ToString();
+                order.testAir = data[i]["c_test_air"].ToString();
+                order.testProductType = data[i]["c_test_product_type"].ToString();
+                order.testLength = data[i]["c_test_length"].ToString();
+                order.testLayingType = data[i]["c_test_laying_type"].ToString();
+                order.testPipeline = data[i]["c_test_pipeline"].ToString();
+                order.testRemark = data[i]["c_test_remark"].ToString();
+                order.testAssess = data[i]["c_test_assess"].ToString();
+                order.testCompress = data[i]["c_test_compress"].ToString();
+                order.testWeld = data[i]["c_test_weld"].ToString();
+                order.testWeldCheck = data[i]["c_test_weld_check"].ToString();
+                order.testKeepStart = data[i]["c_test_kepp_start"].ToString();
+                order.testKeepEnd = data[i]["c_test_kepp_end"].ToString();
+                order.testOperatePressure = data[i]["c_test_operate_pressure"].ToString();
+                order.testCheckPressure = data[i]["c_test_check_pressure"].ToString();
+                order.testUserId = data[i]["c_test_user_id"].ToString();
+                order.testUserName = data[i]["c_test_user_name"].ToString();
+                order.testUserPhone = data[i]["c_test_user_phone"].ToString();
+                order.testNotice = data[i]["c_test_notice"].ToString();
+                order.testCreateTime = data[i]["c_create_time"].ToString();
+                order.testSimpleTime = data[i]["c_test_simple_time"].ToString();
+                order.orderStatus = data[i]["order_status"].ToString();
+                order.createTime = data[i]["create_time"].ToString();
+
+                resultList.Add(order);
+            }
+
+            EventManager.instance.NotifyEvent(Event.GetAppointmentList,true, resultList,total,page,pageCount);
+        }
+
+        /// <summary>
+        /// 获取预约订单详情
+        /// </summary>
+        /// <param name="id">订单Id，不是订单号</param>
+        public void GetAppointmentDetail(string id)
+        {
+            string url = "http://62.234.108.219/Appointment/getDetail";
+            string data = " order_id=" + id;
+            StartCoroutine(Post(url, data, OnGetAppointmentDetail));
+        }
+
+        /// <summary>
+        /// 获取预约订单详情回调
+        /// </summary>
+        /// <param name="result"></param>
+        public void OnGetAppointmentDetail(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetAppointmentGetList, false);
+                Debug.LogError("OnGetAppointmentDetail >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
             Order order = new Order();
-            order.id = data[i]["id"].ToString();
-            order.orderId = data[i]["order_id"].ToString();
-            order.areaId = data[i]["area_id"].ToString();
-            order.userId = data[i]["user_id"].ToString();
-            //order.userName = data[i]["user_name"].ToString();
-            //order.userPhone = data[i]["user_phone"].ToString();
-            order.userName = "";
-            order.userPhone = "";
-            order.type = data[i]["a_type"].ToString();
-            order.community = data[i]["a_community"].ToString();
-            order.address = data[i]["a_address"].ToString();
-            order.name = data[i]["a_name"].ToString();
-            order.phone = data[i]["a_phone"].ToString();
-            order.time = data[i]["a_time"].ToString();
-            order.remark = data[i]["a_remark"].ToString();
-            order.adminId = data[i]["b_admin_id"].ToString();
-            order.testerId = data[i]["b_tester_id"].ToString();
-            order.adminCreateTime = data[i]["b_create_time"].ToString();
-            order.entrancePic = data[i]["c_pic_entrance"].ToString();
-            order.testPic = data[i]["c_pic_test"].ToString();
-            order.roomPic = data[i]["c_pic_room"].ToString();
-            order.bedroomPic = data[i]["c_pic_bedroom"].ToString();
-            order.toiletPic = data[i]["c_pic_toilet"].ToString();
-            order.kitchenPic = data[i]["c_pic_kitchen"].ToString();
-            order.balconyPic = data[i]["c_pic_balcony"].ToString();
-            order.corridorPic = data[i]["c_pic_corridor"].ToString();
-            order.buildId = data[i]["c_build_id"].ToString();
-            order.buildName = data[i]["c_build_name"].ToString();
-            order.buildPhone = data[i]["c_build_phone"].ToString();
-            order.testBuyPlace = data[i]["c_test_buy_place"].ToString();
-            order.testHouseType = data[i]["c_test_house_type"].ToString();
-            order.testKitchenType = data[i]["c_test_kitchen_type"].ToString();
-            order.testToiletType = data[i]["c_test_toilet_type"].ToString();
-            order.testDeveloper = data[i]["c_test_developer"].ToString();
-            order.testDecoration = data[i]["c_test_decoration"].ToString();
-            order.testHvac = data[i]["c_test_hvac"].ToString();
-            order.testAir = data[i]["c_test_air"].ToString();
-            order.testProductType = data[i]["c_test_product_type"].ToString();
-            order.testLength = data[i]["c_test_length"].ToString();
-            order.testLayingType = data[i]["c_test_laying_type"].ToString();
-            order.testPipeline = data[i]["c_test_pipeline"].ToString();
-            order.testRemark = data[i]["c_test_remark"].ToString();
-            order.testAssess = data[i]["c_test_assess"].ToString();
-            order.testCompress = data[i]["c_test_compress"].ToString();
-            order.testWeld = data[i]["c_test_weld"].ToString();
-            order.testWeldCheck = data[i]["c_test_weld_check"].ToString();
-            order.testKeepStart = data[i]["c_test_kepp_start"].ToString();
-            order.testKeepEnd = data[i]["c_test_kepp_end"].ToString();
-            order.testOperatePressure = data[i]["c_test_operate_pressure"].ToString();
-            order.testCheckPressure = data[i]["c_test_check_pressure"].ToString();
-            order.testUserId = data[i]["c_test_user_id"].ToString();
-            order.testUserName = data[i]["c_test_user_name"].ToString();
-            order.testUserPhone = data[i]["c_test_user_phone"].ToString();
-            order.testNotice = data[i]["c_test_notice"].ToString();
-            order.testCreateTime = data[i]["c_create_time"].ToString();
-            order.testSimpleTime = data[i]["c_test_simple_time"].ToString();
-            order.orderStatus = data[i]["order_status"].ToString();
-            order.createTime = data[i]["create_time"].ToString();
+            order.id = result["id"].ToString();
+            order.orderId = result["order_id"].ToString();
+            order.areaId = result["area_id"].ToString();
+            order.userId = result["user_id"].ToString();
+            order.userName = result["user_name"].ToString();
+            order.userPhone = result["user_phone"].ToString();
+            order.type = result["a_type"].ToString();
+            order.community = result["a_community"].ToString();
+            order.address = result["a_address"].ToString();
+            order.name = result["a_name"].ToString();
+            order.phone = result["a_phone"].ToString();
+            order.time = result["a_time"].ToString();
+            order.remark = result["a_remark"].ToString();
+            order.adminId = result["b_admin_id"].ToString();
+            order.testerId = result["b_tester_id"].ToString();
+            order.adminCreateTime = result["b_create_time"].ToString();
+            order.entrancePic = result["c_pic_entrance"].ToString();
+            order.testPic = result["c_pic_test"].ToString();
+            order.roomPic = result["c_pic_room"].ToString();
+            order.bedroomPic = result["c_pic_bedroom"].ToString();
+            order.toiletPic = result["c_pic_toilet"].ToString();
+            order.kitchenPic = result["c_pic_kitchen"].ToString();
+            order.balconyPic = result["c_pic_balcony"].ToString();
+            order.corridorPic = result["c_pic_corridor"].ToString();
+            order.buildId = result["c_build_id"].ToString();
+            order.buildName = result["c_build_name"].ToString();
+            order.buildPhone = result["c_build_phone"].ToString();
+            order.testBuyPlace = result["c_test_buy_place"].ToString();
+            order.testHouseType = result["c_test_house_type"].ToString();
+            order.testKitchenType = result["c_test_kitchen_type"].ToString();
+            order.testToiletType = result["c_test_toilet_type"].ToString();
+            order.testDeveloper = result["c_test_developer"].ToString();
+            order.testDecoration = result["c_test_decoration"].ToString();
+            order.testHvac = result["c_test_hvac"].ToString();
+            order.testAir = result["c_test_air"].ToString();
+            order.testProductType = result["c_test_product_type"].ToString();
+            order.testLength = result["c_test_length"].ToString();
+            order.testLayingType = result["c_test_laying_type"].ToString();
+            order.testPipeline = result["c_test_pipeline"].ToString();
+            order.testRemark = result["c_test_remark"].ToString();
+            order.testAssess = result["c_test_assess"].ToString();
+            order.testCompress = result["c_test_compress"].ToString();
+            order.testWeld = result["c_test_weld"].ToString();
+            order.testWeldCheck = result["c_test_weld_check"].ToString();
+            order.testKeepStart = result["c_test_kepp_start"].ToString();
+            order.testKeepEnd = result["c_test_kepp_end"].ToString();
+            order.testOperatePressure = result["c_test_operate_pressure"].ToString();
+            order.testCheckPressure = result["c_test_check_pressure"].ToString();
+            order.testUserId = result["c_test_user_id"].ToString();
+            order.testUserName = result["c_test_user_name"].ToString();
+            order.testUserPhone = result["c_test_user_phone"].ToString();
+            order.testNotice = result["c_test_notice"].ToString();
+            order.testCreateTime = result["c_create_time"].ToString();
+            order.testSimpleTime = result["c_test_simple_time"].ToString();
+            order.orderStatus = result["order_status"].ToString();
+            order.createTime = result["create_time"].ToString();
 
-            resultList.Add(order);
+            EventManager.instance.NotifyEvent(Event.GetAppointmentGetList,true, order);
         }
 
-        EventManager.instance.NotifyEvent(Event.GetAppointmentList, resultList);
-    }
 
-    /// <summary>
-    /// 获取预约订单详情
-    /// </summary>
-    /// <param name="id">订单Id，不是订单号</param>
-    public void GetAppointmentDetail(string id)
-    {
-        string url = "http://62.234.108.219/Appointment/getDetail";
-        string data = " order_id=" + id;
-        StartCoroutine(Post(url, data, OnGetAppointmentDetail));
-    }
+        #endregion       
 
-    /// <summary>
-    /// 获取预约订单详情回调
-    /// </summary>
-    /// <param name="result"></param>
-    public void OnGetAppointmentDetail(JsonData result)
-    {
-        int status = int.Parse(result["status"].ToString());
-        if (status != 1)
+        #region 我的模块
+        /// <summary>
+        /// 获取系统开发区域列表
+        /// </summary>
+        /// <param name="curPage">当前页数</param>
+        /// <param name="pageCount">每页的条目数</param>
+        public void GetAreaList(int curPage, int pageCount)
         {
-            EventManager.instance.NotifyEvent(Event.GetAppointmentGetList, false);
-            Debug.LogError("OnGetAppointmentDetail >>>>error status:" + status);
-            return;
+            string url = "http://62.234.108.219/Area/getList";
+
+            string lastTime = "";
+            //只有在首页的时候才会刷新上次请求的时间戳
+            if (curPage == 0)
+            {
+                DataManager.instance.areaList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+            }
+            else
+            {
+                lastTime = DataManager.instance.areaList_lastTime.ToString();
+            }
+
+            string data = "page=" + curPage + "&page_count=" + pageCount+"&last_time="+lastTime;
+            StartCoroutine(Post(url, data, OnGetAreaList));
         }
-        result = result["data"];
-        if (result == null)
-            return;
-        Order order = new Order();
-        order.id = result["id"].ToString();
-        order.orderId = result["order_id"].ToString();
-        order.areaId = result["area_id"].ToString();
-        order.userId = result["user_id"].ToString();
-        order.userName = result["user_name"].ToString();
-        order.userPhone = result["user_phone"].ToString();
-        order.type = result["a_type"].ToString();
-        order.community = result["a_community"].ToString();
-        order.address = result["a_address"].ToString();
-        order.name = result["a_name"].ToString();
-        order.phone = result["a_phone"].ToString();
-        order.time = result["a_time"].ToString();
-        order.remark = result["a_remark"].ToString();
-        order.adminId = result["b_admin_id"].ToString();
-        order.testerId = result["b_tester_id"].ToString();
-        order.adminCreateTime = result["b_create_time"].ToString();
-        order.entrancePic = result["c_pic_entrance"].ToString();
-        order.testPic = result["c_pic_test"].ToString();
-        order.roomPic = result["c_pic_room"].ToString();
-        order.bedroomPic = result["c_pic_bedroom"].ToString();
-        order.toiletPic = result["c_pic_toilet"].ToString();
-        order.kitchenPic = result["c_pic_kitchen"].ToString();
-        order.balconyPic = result["c_pic_balcony"].ToString();
-        order.corridorPic = result["c_pic_corridor"].ToString();
-        order.buildId = result["c_build_id"].ToString();
-        order.buildName = result["c_build_name"].ToString();
-        order.buildPhone = result["c_build_phone"].ToString();
-        order.testBuyPlace = result["c_test_buy_place"].ToString();
-        order.testHouseType = result["c_test_house_type"].ToString();
-        order.testKitchenType = result["c_test_kitchen_type"].ToString();
-        order.testToiletType = result["c_test_toilet_type"].ToString();
-        order.testDeveloper = result["c_test_developer"].ToString();
-        order.testDecoration = result["c_test_decoration"].ToString();
-        order.testHvac = result["c_test_hvac"].ToString();
-        order.testAir = result["c_test_air"].ToString();
-        order.testProductType = result["c_test_product_type"].ToString();
-        order.testLength = result["c_test_length"].ToString();
-        order.testLayingType = result["c_test_laying_type"].ToString();
-        order.testPipeline = result["c_test_pipeline"].ToString();
-        order.testRemark = result["c_test_remark"].ToString();
-        order.testAssess = result["c_test_assess"].ToString();
-        order.testCompress = result["c_test_compress"].ToString();
-        order.testWeld = result["c_test_weld"].ToString();
-        order.testWeldCheck = result["c_test_weld_check"].ToString();
-        order.testKeepStart = result["c_test_kepp_start"].ToString();
-        order.testKeepEnd = result["c_test_kepp_end"].ToString();
-        order.testOperatePressure = result["c_test_operate_pressure"].ToString();
-        order.testCheckPressure = result["c_test_check_pressure"].ToString();
-        order.testUserId = result["c_test_user_id"].ToString();
-        order.testUserName = result["c_test_user_name"].ToString();
-        order.testUserPhone = result["c_test_user_phone"].ToString();
-        order.testNotice = result["c_test_notice"].ToString();
-        order.testCreateTime = result["c_create_time"].ToString();
-        order.testSimpleTime = result["c_test_simple_time"].ToString();
-        order.orderStatus = result["order_status"].ToString();
-        order.createTime = result["create_time"].ToString();
 
-        EventManager.instance.NotifyEvent(Event.GetAppointmentGetList, order);
-    }
-
-
-    #endregion
-
-    /// <summary>
-    /// 获取帖子详情
-    /// </summary>
-    public void GetDetail(string forunid)
-    {
-        string url = "http://62.234.108.219/Forum/getDetail";
-        string data = "forum_id=" + forunid;
-        StartCoroutine(Post(url, data, OnGetDetail));
-    }
-
-    private void OnGetDetail(JsonData result)
-    {
-        EventManager.instance.NotifyEvent(Event.GetDetail);
-    }
-
-    #region 我的模块
-    /// <summary>
-    /// 获取系统开发区域列表
-    /// </summary>
-    /// <param name="curPage">当前页数</param>
-    /// <param name="pageCount">每页的条目数</param>
-    public void GetAreaList(int curPage, int pageCount)
-    {
-        string url = "http://62.234.108.219/Area/getList";
-        string data = "page=" + curPage + "& page_count=" + pageCount;
-        StartCoroutine(Post(url, data, OnGetAreaList));
-    }
-
-    /// <summary>
-    /// 获取系统开放区域列表结果
-    /// </summary>
-    private void OnGetAreaList(JsonData result)
-    { }
-
-    /// <summary>
-    /// 获取收藏列表
-    /// </summary>
-    /// <param name="curPage">当前页数</param>
-    /// <param name="pageCount">每页的条目数</param>
-    public void GetCollectionList(int curPage, int pageCount)
-    {
-        string url = "http://62.234.108.219/Forum/getCollectionList";
-        string data = "page=" + curPage + "& page_count=" + pageCount;
-        StartCoroutine(Post(url, data, OnGetCollectionList));
-    }
-
-    /// <summary>
-    /// 返回获取收藏列表
-    /// </summary>
-    /// <param name="result"></param>
-    public void OnGetCollectionList(JsonData result)
-    {
-
-    }
-
-    /// <summary>
-    /// 【获取我的积分】针对经销商和水工
-    /// </summary>
-    public void GetUserPoint()
-    {
-        if (UserData.instance.role == 1 || UserData.instance.role == 2)
-            return;
-
-        string url = "http://62.234.108.219/User/getPoint";
-        string data = "";
-        StartCoroutine(Post(url, data, OnGetUserPoint));
-    }
-
-    /// <summary>
-    /// 积分返回结果
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnGetUserPoint(JsonData result)
-    {
-    }
-
-    /// <summary>
-    /// 【获取我的邀请码】针对经销商和水工
-    /// </summary>
-    public void GetInviteCode()
-    {
-        if (UserData.instance.role == 1 || UserData.instance.role == 2)
-            return;
-
-        string url = "http://62.234.108.219/User/getInviteCode";
-        string data = "";
-        StartCoroutine(Post(url, data, OnGetInviteCode));
-    }
-
-    /// <summary>
-    /// 邀请码返回结果
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnGetInviteCode(JsonData result)
-    {
-        if (UserData.instance.role == 1 || UserData.instance.role == 2)
-            return;
-
-        string url = "http://62.234.108.219/User/getInviteCode";
-        string data = "";
-        StartCoroutine(Post(url, data, OnGetInviteCode));
-    }
-
-    /// <summary>
-    /// 【获取我的等级】针对经销商和水工
-    /// </summary>
-    public void GetLevel()
-    {
-        if (UserData.instance.role == 1 || UserData.instance.role == 2)
-            return;
-
-        string url = "http://62.234.108.219/User/getLevel";
-        string data = "";
-        StartCoroutine(Post(url, data, OnGetLevel));
-    }
-
-    /// <summary>
-    /// 返回等级
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnGetLevel(JsonData result)
-    { }
-
-    /// <summary>
-    /// 获取我的蓝圈列表】 我的回帖，将显示“我回复的帖子”所属主贴，系统自动去重
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="curPage"></param>
-    /// <param name="pageCount"></param>
-    public void GetCircleList(int type, int curPage, int pageCount)
-    {
-        string url = "http://62.234.108.219/Forum/getCircleList";
-        string data = "type=" + type + "&page=" + curPage + "&page_count=" + pageCount;
-        StartCoroutine(Post(url, data, OnGetCircleList));
-    }
-
-    private void OnGetCircleList(JsonData result)
-    { }
-
-
-    #endregion
-
-
-    /// <summary>
-    /// 发帖
-    /// </summary>
-    public void CreateForum(string catid, string title, string content, string[] imgArray)
-    {
-        string url = "http://62.234.108.219/Forum/create";
-        string data = "cat_id=" + catid + "&title=" + title + "&content=" + content;
-        for (int i = 0; i < imgArray.Length; i++)
+        /// <summary>
+        /// 获取系统开放区域列表结果
+        /// </summary>
+        private void OnGetAreaList(JsonData result)
         {
-            data += "&upload_images[]=" + imgArray[i];
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetAreaList, false);
+                Debug.LogError("OnGetAreaList >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            JsonData data = result["list"];
+            List<Area> dataList = new List<Area>();
+            for (int i = 0; i < data.Count; i++)
+            {
+                Area area = new Area();
+                area.id = int.Parse(data[i]["id"].ToString());
+                area.title = data[i]["title"].ToString();
+                area.createTime = data[i]["create_time"].ToString();
+                dataList.Add(area);
+            }
+            EventManager.instance.NotifyEvent(Event.GetAreaList, true,dataList);
+
         }
-        StartCoroutine(Post(url, data, OnCreateForum));
-    }
 
-    /// <summary>
-    /// 发帖回调
-    /// </summary>
-    /// <param name="result"></param>
-    private void OnCreateForum(JsonData result)
-    {
+        /// <summary>
+        /// 获取收藏列表
+        /// </summary>
+        /// <param name="curPage">当前页数</param>
+        /// <param name="pageCount">每页的条目数</param>
+        public void GetCollectionList(int curPage, int pageCount)
+        {
+            string url = "http://62.234.108.219/Forum/getCollectionList";
+            string lastTime = "";
+            //只有在首页的时候才会刷新上次请求的时间戳
+            if (curPage == 0)
+            {
+                DataManager.instance.collectionList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+            }
+            else
+            {
+                lastTime = DataManager.instance.collectionList_lastTime.ToString();
+            }
+            string data = "page=" + curPage + "&page_count=" + pageCount+"&last_time="+lastTime;
+            StartCoroutine(Post(url, data, OnGetCollectionList));
+        }
 
+        /// <summary>
+        /// 返回获取收藏列表
+        /// </summary>
+        /// <param name="result"></param>
+        public void OnGetCollectionList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetCollectionList, false);
+                Debug.LogError("OnGetCollectionList >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            JsonData data = result["list"];
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
+            int pageCount = int.Parse(result["page_count"].ToString());
+
+            List<Node> nodeList = new List<Node>();
+            for (int i = 0; i < data.Count; i++)
+            {
+                Node node = new Node();
+                node.id = int.Parse(data[i]["id"].ToString());
+                node.title = data[i]["title"].ToString();
+                node.catId =int.Parse(data[i]["cat_id"].ToString());
+                node.userId = int.Parse(data[i]["user_id"].ToString());
+                node.userName = data[i]["user_name"].ToString();
+                node.userAvatar= data[i]["user_avatar"].ToString();
+                node.view= int.Parse(data[i]["view"].ToString());
+                node.comment = int.Parse(data[i]["comment"].ToString());
+                node.create_time = data[i]["create_time"].ToString();
+                nodeList.Add(node);
+            }
+            EventManager.instance.NotifyEvent(Event.GetCollectionList, true,nodeList,total,page,pageCount);
+
+        }
+
+        /// <summary>
+        /// 【获取我的积分】针对经销商和水工
+        /// </summary>
+        public void GetUserPoint()
+        {
+            if (UserData.instance.role == 1 || UserData.instance.role == 2)
+                return;
+
+            string url = "http://62.234.108.219/User/getPoint";
+            string data = "";
+            StartCoroutine(Post(url, data, OnGetUserPoint));
+        }
+
+        /// <summary>
+        /// 积分返回结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetUserPoint(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetUserPoint, false);
+                Debug.LogError("OnGetUserPoint >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            UserData.instance.point = int.Parse(result.ToString());
+            EventManager.instance.NotifyEvent(Event.GetUserPoint, true, UserData.instance.point);
+        }
+
+        /// <summary>
+        /// 【获取我的邀请码】针对经销商和水工
+        /// </summary>
+        public void GetInviteCode()
+        {
+            if (UserData.instance.role == 1 || UserData.instance.role == 2)
+                return;
+
+            string url = "http://62.234.108.219/User/getInviteCode";
+            string data = "";
+            StartCoroutine(Post(url, data, OnGetInviteCode));
+        }
+
+        /// <summary>
+        /// 邀请码返回结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetInviteCode(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetInviteCode, false);
+                Debug.LogError("OnGetInviteCode >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            string code = result.ToString();
+            EventManager.instance.NotifyEvent(Event.GetInviteCode, true,code);
+        }
+
+        /// <summary>
+        /// 【获取我的等级】针对经销商和水工
+        /// </summary>
+        public void GetLevel()
+        {
+            if (UserData.instance.role == 1 || UserData.instance.role == 2)
+                return;
+
+            string url = "http://62.234.108.219/User/getLevel";
+            string data = "";
+            StartCoroutine(Post(url, data, OnGetLevel));
+        }
+
+        /// <summary>
+        /// 返回等级
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetLevel(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetLevel, false);
+                Debug.LogError("OnGetLevel >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+           UserData.instance.level =int.Parse(result["level"].ToString());
+            int orderNum = int.Parse(result["order_num"].ToString());
+            EventManager.instance.NotifyEvent(Event.GetLevel, true, UserData.instance.level,orderNum);
+        }
+
+        /// <summary>
+        /// 获取我的蓝圈列表】 我的回帖，将显示“我回复的帖子”所属主贴，系统自动去重
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="curPage"></param>
+        /// <param name="pageCount"></param>
+        public void GetCircleList(int type, int curPage, int pageCount)
+        {
+            string url = "http://62.234.108.219/Forum/getCircleList";          
+            string lastTime = "";
+            //只有在首页的时候才会刷新上次请求的时间戳
+            if (curPage == 0)
+            {
+                DataManager.instance.circleList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+            }
+            else
+            {
+                lastTime = DataManager.instance.circleList_lastTime.ToString();
+            }
+
+            string data = "type=" + type + "&page=" + curPage + "&page_count=" + pageCount+"&last_time="+lastTime;
+            StartCoroutine(Post(url, data, OnGetCircleList));
+        }
+
+        private void OnGetCircleList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetCircleList, false);
+                Debug.LogError("OnGetCircleList >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
+            int page_count = int.Parse(result["page_count"].ToString());
+
+            JsonData data = result["list"];
+            List<Node> nodeList = new List<Node>();
+            for (int i = 0; i < data.Count; i++)
+            {
+                Node node = new Node();
+                node.id = int.Parse(data[i]["id"].ToString());
+                node.title = data[i]["title"].ToString();
+                node.content = data[i]["content"].ToString();
+                node.catId = int.Parse(data[i]["cat_id"].ToString());
+                node.userId = int.Parse(data[i]["user_id"].ToString());
+                node.parentId = data[i]["parent_id"].ToString();
+                node.userName = data[i]["user_name"].ToString();
+                node.userAvatar = data[i]["user_avatar"].ToString();
+                node.uploadImages = data[i]["upload_images"].ToString();
+                node.view = int.Parse(data[i]["view"].ToString());
+                node.comment = int.Parse(data[i]["comment"].ToString());
+                node.create_time = data[i]["create_time"].ToString();
+                nodeList.Add(node);
+            }
+            EventManager.instance.NotifyEvent(Event.GetCircleList, true, nodeList, total, page, page_count);
+
+        }
+        #endregion
+
+        #region 论坛模块
+        /// <summary>
+        /// 获取帖子详情及回帖，回帖按时间倒序
+        /// </summary>
+        public void GetDetail(string forunid)
+        {
+            string url = "http://62.234.108.219/Forum/getDetail";
+            string data = "forum_id=" + forunid;
+            StartCoroutine(Post(url, data, OnGetDetail));
+        }
+
+        private void OnGetDetail(JsonData result)
+        {
+            EventManager.instance.NotifyEvent(Event.GetDetail);
+        }
+
+        /// <summary>
+        /// 发帖
+        /// </summary>
+        public void CreateForum(string catid, string title, string content, string[] imgArray)
+        {
+            string url = "http://62.234.108.219/Forum/create";
+            string data = "cat_id=" + catid + "&title=" + title + "&content=" + content;
+            for (int i = 0; i < imgArray.Length; i++)
+            {
+                data += "&upload_images[]=" + imgArray[i];
+            }
+            StartCoroutine(Post(url, data, OnCreateForum));
+        }
+
+        /// <summary>
+        /// 发帖回调
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnCreateForum(JsonData result)
+        {
+
+        }
+        #endregion
     }
-}
 }
