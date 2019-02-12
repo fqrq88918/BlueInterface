@@ -624,10 +624,10 @@ namespace XMWorkspace
             int page = int.Parse(result["page"].ToString());
             int pageCount = int.Parse(result["page_count"].ToString());
 
-            List<Node> nodeList = new List<Node>();
+            List<Forum> nodeList = new List<Forum>();
             for (int i = 0; i < data.Count; i++)
             {
-                Node node = new Node();
+                Forum node = new Forum();
                 node.id = int.Parse(data[i]["id"].ToString());
                 node.title = data[i]["title"].ToString();
                 node.catId =int.Parse(data[i]["cat_id"].ToString());
@@ -788,19 +788,20 @@ namespace XMWorkspace
             int page_count = int.Parse(result["page_count"].ToString());
 
             JsonData data = result["list"];
-            List<Node> nodeList = new List<Node>();
+            List<Forum> nodeList = new List<Forum>();
             for (int i = 0; i < data.Count; i++)
             {
-                Node node = new Node();
+                Forum node = new Forum();
                 node.id = int.Parse(data[i]["id"].ToString());
                 node.title = data[i]["title"].ToString();
                 node.content = data[i]["content"].ToString();
                 node.catId = int.Parse(data[i]["cat_id"].ToString());
                 node.userId = int.Parse(data[i]["user_id"].ToString());
-                node.parentId = data[i]["parent_id"].ToString();
                 node.userName = data[i]["user_name"].ToString();
                 node.userAvatar = data[i]["user_avatar"].ToString();
-                node.uploadImages = data[i]["upload_images"].ToString();
+                
+                //node.uploadImages = data[i]["upload_images"].ToString();
+
                 node.view = int.Parse(data[i]["view"].ToString());
                 node.comment = int.Parse(data[i]["comment"].ToString());
                 node.create_time = data[i]["create_time"].ToString();
