@@ -294,7 +294,7 @@ namespace XMWorkspace
         /// <param name="phone">业主电话</param>
         /// <param name="time">预约上门时间</param>
         /// <param name="remark">备注</param>
-        public void CreateAppoiment(string areaId, string type, string community, string address, string name, string phone, string time, string remark)
+        public void CreateAppoiment(int areaId, int type, string community, string address, string name, string phone, int time, string remark)
         {
             string url = "http://62.234.108.219/Appointment/create";
             string data = " area_id=" + areaId + "&type=" + type + "&community=" + community + "&address=" + address + "&name=" + name + "&phone=" + phone + "&time=" + time + "&remark=" + remark;
@@ -329,18 +329,18 @@ namespace XMWorkspace
         {
             string url = "http://62.234.108.219/Appointment/getOrderList";
             string lastTime = "";
+            string data = "";
             //只有在首页的时候才会刷新上次请求的时间戳
             if (page == 0)
             {
                 DataManager.instance.orderList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&search[order_id]=" + searchOrderId;
             }
             else
             {
                 lastTime = DataManager.instance.orderList_lastTime.ToString();
+                data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&last_time=" + lastTime + "&search[order_id]=" + searchOrderId;
             }
-
-
-            string data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&last_time=" + lastTime + "&search[order_id]=" + searchOrderId;
             StartCoroutine(Post(url, data, OnGetAppointmentOrderList));
         }
 
@@ -361,8 +361,8 @@ namespace XMWorkspace
             if (result == null)
                 return;
 
-            int total =int.Parse( result["total"].ToString());
-            int page =int.Parse( result["page"].ToString());
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
             int pageCount = int.Parse(result["page_count"].ToString());
             JsonData data = result["list"];
             List<Order> resultList = new List<Order>();
@@ -431,14 +431,14 @@ namespace XMWorkspace
                 resultList.Add(order);
             }
 
-            EventManager.instance.NotifyEvent(Event.GetAppointmentList,true, resultList,total,page,pageCount);
+            EventManager.instance.NotifyEvent(Event.GetAppointmentList, true, resultList, total, page, pageCount);
         }
 
         /// <summary>
         /// 获取预约订单详情
         /// </summary>
         /// <param name="id">订单Id，不是订单号</param>
-        public void GetAppointmentDetail(string id)
+        public void GetAppointmentDetail(int id)
         {
             string url = "http://62.234.108.219/Appointment/getDetail";
             string data = " order_id=" + id;
@@ -519,7 +519,7 @@ namespace XMWorkspace
             order.orderStatus = result["order_status"].ToString();
             order.createTime = result["create_time"].ToString();
 
-            EventManager.instance.NotifyEvent(Event.GetAppointmentGetList,true, order);
+            EventManager.instance.NotifyEvent(Event.GetAppointmentGetList, true, order);
         }
 
 
@@ -536,17 +536,20 @@ namespace XMWorkspace
             string url = "http://62.234.108.219/Area/getList";
 
             string lastTime = "";
+            string data = "";
             //只有在首页的时候才会刷新上次请求的时间戳
             if (curPage == 0)
             {
                 DataManager.instance.areaList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                data = "page=" + curPage + "&page_count=" + pageCount;
             }
             else
             {
                 lastTime = DataManager.instance.areaList_lastTime.ToString();
+                data = "page=" + curPage + "&page_count=" + pageCount + "&last_time=" + lastTime;
             }
 
-            string data = "page=" + curPage + "&page_count=" + pageCount+"&last_time="+lastTime;
+
             StartCoroutine(Post(url, data, OnGetAreaList));
         }
 
@@ -576,7 +579,7 @@ namespace XMWorkspace
                 area.createTime = data[i]["create_time"].ToString();
                 dataList.Add(area);
             }
-            EventManager.instance.NotifyEvent(Event.GetAreaList, true,dataList);
+            EventManager.instance.NotifyEvent(Event.GetAreaList, true, dataList);
 
         }
 
@@ -589,16 +592,18 @@ namespace XMWorkspace
         {
             string url = "http://62.234.108.219/Forum/getCollectionList";
             string lastTime = "";
+            string data = "";
             //只有在首页的时候才会刷新上次请求的时间戳
             if (curPage == 0)
             {
                 DataManager.instance.collectionList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                data = "page=" + curPage + "&page_count=" + pageCount;
             }
             else
             {
                 lastTime = DataManager.instance.collectionList_lastTime.ToString();
+                data = "page=" + curPage + "&page_count=" + pageCount + "&last_time=" + lastTime;
             }
-            string data = "page=" + curPage + "&page_count=" + pageCount+"&last_time="+lastTime;
             StartCoroutine(Post(url, data, OnGetCollectionList));
         }
 
@@ -630,16 +635,16 @@ namespace XMWorkspace
                 Forum node = new Forum();
                 node.id = int.Parse(data[i]["id"].ToString());
                 node.title = data[i]["title"].ToString();
-                node.catId =int.Parse(data[i]["cat_id"].ToString());
+                node.catId = int.Parse(data[i]["cat_id"].ToString());
                 node.userId = int.Parse(data[i]["user_id"].ToString());
                 node.userName = data[i]["user_name"].ToString();
-                node.userAvatar= data[i]["user_avatar"].ToString();
-                node.view= int.Parse(data[i]["view"].ToString());
+                node.userAvatar = data[i]["user_avatar"].ToString();
+                node.view = int.Parse(data[i]["view"].ToString());
                 node.comment = int.Parse(data[i]["comment"].ToString());
                 node.create_time = data[i]["create_time"].ToString();
                 nodeList.Add(node);
             }
-            EventManager.instance.NotifyEvent(Event.GetCollectionList, true,nodeList,total,page,pageCount);
+            EventManager.instance.NotifyEvent(Event.GetCollectionList, true, nodeList, total, page, pageCount);
 
         }
 
@@ -708,7 +713,7 @@ namespace XMWorkspace
                 return;
 
             string code = result.ToString();
-            EventManager.instance.NotifyEvent(Event.GetInviteCode, true,code);
+            EventManager.instance.NotifyEvent(Event.GetInviteCode, true, code);
         }
 
         /// <summary>
@@ -741,9 +746,9 @@ namespace XMWorkspace
             if (result == null)
                 return;
 
-           UserData.instance.level =int.Parse(result["level"].ToString());
+            UserData.instance.level = int.Parse(result["level"].ToString());
             int orderNum = int.Parse(result["order_num"].ToString());
-            EventManager.instance.NotifyEvent(Event.GetLevel, true, UserData.instance.level,orderNum);
+            EventManager.instance.NotifyEvent(Event.GetLevel, true, UserData.instance.level, orderNum);
         }
 
         /// <summary>
@@ -754,22 +759,27 @@ namespace XMWorkspace
         /// <param name="pageCount"></param>
         public void GetCircleList(int type, int curPage, int pageCount)
         {
-            string url = "http://62.234.108.219/Forum/getCircleList";          
+            string url = "http://62.234.108.219/Forum/getCircleList";
             string lastTime = "";
+            string data = "";
             //只有在首页的时候才会刷新上次请求的时间戳
             if (curPage == 0)
             {
                 DataManager.instance.circleList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                data = "type=" + type + "&page=" + curPage + "&page_count=" + pageCount;
             }
             else
             {
                 lastTime = DataManager.instance.circleList_lastTime.ToString();
+                data = "type=" + type + "&page=" + curPage + "&page_count=" + pageCount + "&last_time=" + lastTime;
             }
-
-            string data = "type=" + type + "&page=" + curPage + "&page_count=" + pageCount+"&last_time="+lastTime;
             StartCoroutine(Post(url, data, OnGetCircleList));
         }
 
+        /// <summary>
+        /// 获取篮圈列表回调
+        /// </summary>
+        /// <param name="result"></param>
         private void OnGetCircleList(JsonData result)
         {
             int status = int.Parse(result["status"].ToString());
@@ -799,7 +809,7 @@ namespace XMWorkspace
                 node.userId = int.Parse(data[i]["user_id"].ToString());
                 node.userName = data[i]["user_name"].ToString();
                 node.userAvatar = data[i]["user_avatar"].ToString();
-                
+
                 //node.uploadImages = data[i]["upload_images"].ToString();
 
                 node.view = int.Parse(data[i]["view"].ToString());
@@ -810,6 +820,8 @@ namespace XMWorkspace
             EventManager.instance.NotifyEvent(Event.GetCircleList, true, nodeList, total, page, page_count);
 
         }
+
+
         #endregion
 
         #region 论坛模块
