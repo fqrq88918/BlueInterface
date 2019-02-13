@@ -19,7 +19,8 @@ namespace XMWorkspace
         public static int DateTimeToTimeStamp(int year, int month, int day, int hour = 0, int mintue = 0, int second = 0)
         {
             System.DateTime now = new System.DateTime(year, month, day, hour, mintue, second);
-            return int.Parse((now.Ticks / 10000000).ToString());
+            System.TimeSpan ts = now.ToUniversalTime() - new System.DateTime(1970, 1, 1);
+            return (int)ts.TotalSeconds;
         }
 
         /// <summary>
@@ -36,6 +37,7 @@ namespace XMWorkspace
             int min = int.Parse(timeString.Split(' ')[1].Split('-')[1]);
             int sec = int.Parse(timeString.Split(' ')[1].Split('-')[2]);
 
+
             return DateTimeToTimeStamp(year, month, day, hour, min, sec);
         }
 
@@ -45,7 +47,8 @@ namespace XMWorkspace
         /// <returns></returns>
         public static int GetTimeStamp()
         {
-            return int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+            System.TimeSpan ts = System.DateTime.Now.ToUniversalTime() - new System.DateTime(1970, 1, 1);
+            return (int)ts.TotalSeconds; ;
         }
 
         /// <summary>
