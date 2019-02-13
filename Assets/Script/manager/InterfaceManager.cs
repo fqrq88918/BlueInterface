@@ -136,6 +136,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.Regist, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnRegister >>>>error status:" + status);
                 return;
             }
@@ -174,6 +175,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 Debug.LogError("OnLogin >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
                 EventManager.instance.NotifyEvent(Event.Login, false);
                 return;
             }
@@ -216,6 +218,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.SetRole, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnSetRole >>>>error status:" + status);
                 return;
             }
@@ -246,6 +249,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 Debug.LogError("OnSetArea >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
                 EventManager.instance.NotifyEvent(Event.SetArea, false);
                 return;
             }
@@ -275,6 +279,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 Debug.LogError("OnGetSmsCode >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
                 EventManager.instance.NotifyEvent(Event.GetSmsCode, false);
                 return;
             }
@@ -312,6 +317,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.CreateAppointment, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnCreateAppointment >>>>error status:" + status);
                 return;
             }
@@ -355,6 +361,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetAppointmentList, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetAppointmentOrderList >>>>error status:" + status);
                 return;
             }
@@ -456,6 +463,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetAppointmentGetList, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetAppointmentDetail >>>>error status:" + status);
                 return;
             }
@@ -563,6 +571,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetAreaList, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetAreaList >>>>error status:" + status);
                 return;
             }
@@ -618,6 +627,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetCollectionList, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetCollectionList >>>>error status:" + status);
                 return;
             }
@@ -672,6 +682,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetUserPoint, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetUserPoint >>>>error status:" + status);
                 return;
             }
@@ -706,6 +717,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetInviteCode, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetInviteCode >>>>error status:" + status);
                 return;
             }
@@ -740,6 +752,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetLevel, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetLevel >>>>error status:" + status);
                 return;
             }
@@ -787,6 +800,7 @@ namespace XMWorkspace
             if (status != 1)
             {
                 EventManager.instance.NotifyEvent(Event.GetCircleList, false);
+                Util.ShowErrorMessage(status);
                 Debug.LogError("OnGetCircleList >>>>error status:" + status);
                 return;
             }
@@ -810,8 +824,7 @@ namespace XMWorkspace
                 node.userId = int.Parse(data[i]["user_id"].ToString());
                 node.userName = data[i]["user_name"].ToString();
                 node.userAvatar = data[i]["user_avatar"].ToString();
-
-                //node.uploadImages = data[i]["upload_images"].ToString();
+                node.uploadImages = JsonMapper.ToObject<List<string>>(data[i]["upload_images"].ToString());
 
                 node.view = int.Parse(data[i]["view"].ToString());
                 node.comment = int.Parse(data[i]["comment"].ToString());
@@ -822,7 +835,99 @@ namespace XMWorkspace
 
         }
 
+        /// <summary>
+        /// 【获取我的等级】针对经销商和水工
+        /// </summary>
+        public void GetLastWeekSign()
+        {
+            if (UserData.instance.role == 3)
+                return;
 
+            string url = "http://62.234.108.219/User/getLastWeekSign";
+            string data = "";
+            StartCoroutine(Post(url, data, OnGetLastWeekSign));
+        }
+
+        /// <summary>
+        /// 返回等级
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetLastWeekSign(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.GetLastWeekSign, false);
+                Util.ShowErrorMessage(status);
+                Debug.LogError("OnGetLastWeekSign >>>>error status:" + status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            UserData.instance.lastWeekSign = JsonMapper.ToObject<List<int>>(result["level"].ToString());
+            EventManager.instance.NotifyEvent(Event.GetLevel, true, UserData.instance.lastWeekSign);
+        }
+
+        /// <summary>
+        /// 设置头像
+        /// </summary>
+        /// <param name="url">新的头像地址</param>
+        public void SetAvatar(string avatarUrl)
+        {
+            string url = "http://62.234.108.219/User/setAvatar";
+            string data = "avatar_url="+avatarUrl;
+            StartCoroutine(Post(url, data, OnGetLastWeekSign));
+        }
+
+        /// <summary>
+        /// 设置头像结果
+        /// </summary>
+        /// <param name="result"></param>
+        public void OnSetAvatar(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                EventManager.instance.NotifyEvent(Event.SetAvatar, false);
+                Util.ShowErrorMessage(status);
+                Debug.LogError("OnSetAvatar >>>>error status:" + status);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.SetAvatar, true);
+           
+        }
+
+       /// <summary>
+       /// 修改密码
+       /// </summary>
+       /// <param name="phone">手机号</param>
+       /// <param name="code">短信验证码</param>
+       /// <param name="password">密码</param>
+        public void ModifyPassword(string phone, string code ,string password)
+        {
+            string url = "http://62.234.108.219/User/modifyPwd";
+            string data = "phone=" + phone + "&sms_code=" + code + "&new_pwd=" + password;
+            StartCoroutine(Post(url, data, OnModifyPassword));
+        }
+
+        /// <summary>
+        /// 修改密码返回结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnModifyPassword(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnModifyPassword >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.ModifyPassword, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.ModifyPassword, true);
+        }
         #endregion
 
         #region 论坛模块

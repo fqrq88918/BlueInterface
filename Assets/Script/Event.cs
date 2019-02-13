@@ -5,6 +5,7 @@ using UnityEngine;
 namespace XMWorkspace
 {
     public enum Event  {
+        ShowMessage=0,
         Regist=1,
         Login=2,	
         GetDetail=3,
@@ -20,5 +21,8 @@ namespace XMWorkspace
         GetInviteCode=13,
         GetLevel=14,
         GetCircleList=15,
+        GetLastWeekSign=16,
+        SetAvatar=17,
+        ModifyPassword=18,
     }
 }

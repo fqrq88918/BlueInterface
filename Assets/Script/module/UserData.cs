@@ -16,7 +16,7 @@ public class UserData : Singleton<UserData> {
     /// </summary>
     public string phone;
     /// <summary>
-    /// 身份
+    /// 身份:1为“经销商”，2为“水工”，3为“试压员”
     /// </summary>
     public int role;
     /// <summary>
@@ -49,4 +49,9 @@ public class UserData : Singleton<UserData> {
     /// 签到天数，试压员无此项
     /// </summary>
     public int totalSign = 0;
+
+    /// <summary>
+    /// 【近7日签到情况】针对经销商和水工,试压员无此项
+    /// </summary>
+    public List<int> lastWeekSign = new List<int>();
 }

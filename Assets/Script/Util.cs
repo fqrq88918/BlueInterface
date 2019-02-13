@@ -5,7 +5,7 @@ using UnityEngine;
 namespace XMWorkspace
 {
     public class Util
-    {
+    { 
         /// <summary>
         /// 日期转成时间戳，精确到秒
         /// </summary>
@@ -46,6 +46,26 @@ namespace XMWorkspace
         public static int GetTimeStamp()
         {
             return int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+        }
+
+        /// <summary>
+        /// 错误消息提示
+        /// </summary>
+        /// <param name="messageId"></param>
+        public static void ShowErrorMessage(int messageId)       
+        {
+            string msg = "";
+            switch (messageId)
+            {
+                case -1:msg = "失败";break;
+                case -2: msg = "参数错误"; break;
+                case -3: msg = "验证码错误"; break;
+                case -4: msg = "TOKEN校验失败"; break;
+                //case 1: msg = "成功"; break;
+                case 2: msg = "内容为空"; break;
+                default:msg = "未知错误";break;
+            }
+            EventManager.instance.NotifyEvent(Event.ShowMessage, msg);
         }
 
     }
