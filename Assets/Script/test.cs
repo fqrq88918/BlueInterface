@@ -12,6 +12,8 @@ namespace XMWorkspace
 
         // Use this for initialization
         void Start () {
+           
+         //   Debug.Log((System.DateTime.Now.Ticks / 10000000).ToString());
             registerBtn.onClick = register;
             loginBtn.onClick = login;
 
@@ -30,7 +32,11 @@ namespace XMWorkspace
         }
 
         void login(GameObject go, PointerEventData eventdata)
-        {       
+        {
+            System.DateTime start = new System.DateTime(1970, 1, 1, 0, 0, 0);
+            Debug.Log(Util.GetTimeStamp());
+            
+            return;
             Debug.Log("click login");
             GameObject.Find("Camera").GetComponent<InterfaceManager>().Login(1, "11223344556", "123456", "8888");
         }

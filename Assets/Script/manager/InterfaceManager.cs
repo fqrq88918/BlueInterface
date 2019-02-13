@@ -973,18 +973,63 @@ namespace XMWorkspace
 
         #region 论坛模块
         /// <summary>
-        /// 获取帖子详情及回帖，回帖按时间倒序
+        /// 获取纯净小蓝官方发布列表
         /// </summary>
-        public void GetDetail(string forunid)
+        /// <param name="page"></param>
+        /// <param name="pageCount"></param>
+        public void GetOfficialList(int curPage,int pageCount)
         {
-            string url = "http://62.234.108.219/Forum/getDetail";
-            string data = "forum_id=" + forunid;
-            StartCoroutine(Post(url, data, OnGetDetail));
+            string url = "http://62.234.108.219/Official/getList";
+            string lastTime = "";
+            string data = "";
+            if (curPage == 0)
+            {
+                DataManager.instance.officialList_lastTime = Util.GetTimeStamp();
+                data ="page=" + curPage + "&page_count=" + pageCount;
+            }
+            else
+            {
+                lastTime = DataManager.instance.officialList_lastTime.ToString();
+                data ="page=" + curPage + "&page_count=" + pageCount + "&last_time=" + lastTime;
+            }
+            StartCoroutine(Post(url, data, OnGetOfficialList));
         }
 
-        private void OnGetDetail(JsonData result)
+        /// <summary>
+        /// 获取官方发布列表结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetOfficialList(JsonData result)
         {
-            EventManager.instance.NotifyEvent(Event.GetDetail);
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetOfficialList >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetOfficialList, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
+            int pageCount = int.Parse(result["page_count"].ToString());
+            JsonData data = result["list"];
+            List<OfficalForum> officialForumList = new List<OfficalForum>();
+            for (int i = 0; i < data.Count; i++)
+            {
+                OfficalForum tmp = new OfficalForum();
+                tmp.id = int.Parse(data[i]["id"].ToString());
+                tmp.title = data[i]["title"].ToString();
+                tmp.content = data[i]["content"].ToString();
+                tmp.thumb = data[i]["thumb"].ToString();
+                tmp.isTop = int.Parse(data[i]["is_top"].ToString()) == 1;
+                tmp.comment = int.Parse(data[i]["comment"].ToString());
+                tmp.view = int.Parse(data[i]["view"].ToString());
+                officialForumList.Add(tmp);
+            }
+            EventManager.instance.NotifyEvent(Event.GetOfficialList, true,officialForumList,total,page,pageCount);
         }
 
         /// <summary>
@@ -1007,8 +1052,185 @@ namespace XMWorkspace
         /// <param name="result"></param>
         private void OnCreateForum(JsonData result)
         {
-
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnCreateForum >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.CreateForum, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.CreateForum, true);
         }
+
+        /// <summary>
+        /// 回帖
+        /// </summary>
+        /// <param name="forumId">主贴ID</param>
+        /// <param name="content">回复内容,最多140字</param>
+        public void ReplyForum(int forumId,string content)
+        {
+            string url = "http://62.234.108.219/Forum/reply";
+            string data = "forum_id=" + forumId + "&content=" + content ;
+            StartCoroutine(Post(url, data, OnReplyForum));
+        }
+
+        /// <summary>
+        /// 回帖结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnReplyForum(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnReplyForum >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.ReplyForum, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.ReplyForum, true);
+        }
+
+        /// <summary>
+        /// 收藏帖子
+        /// </summary>
+        /// <param name="forumId"></param>
+        public void CollectForum(int forumId)
+        {
+            string url = "http://62.234.108.219/Forum/collect";
+            string data = "user_id=" + UserData.instance.id + "&forum_id=" + forumId;
+            StartCoroutine(Post(url, data, OnCollectForum));
+        }
+
+        /// <summary>
+        /// 收藏帖子回调
+        /// </summary>
+        /// <param name="result"></param>
+        public void OnCollectForum(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnCollectForum >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.CollectForum, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.CollectForum, true);
+        }
+
+        /// <summary>
+        /// 获取官方帖子详情
+        /// </summary>
+        /// <param name="id"></param>
+        public void GetOfficialDetail(int id)
+        {
+            string url = "http://62.234.108.219/Official/getDetail";
+            string data = "id=" + id;
+            StartCoroutine(Post(url, data, OnGetOfficialDetail));
+        }
+
+        /// <summary>
+        /// 获取官方帖子详情结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetOfficialDetail(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetOfficialDetail >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetOfficialForumDetail, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            OfficalForum officalForum = new OfficalForum();
+            officalForum.id = int.Parse(result["id"].ToString());
+            officalForum.title = result["title"].ToString();
+            officalForum.content = result["content"].ToString();
+            officalForum.thumb = result["thumb"].ToString();
+            officalForum.isTop = int.Parse(result["is_top"].ToString()) == 1;
+            officalForum.view = int.Parse(result["view"].ToString());
+            officalForum.comment = int.Parse(result["comment"].ToString());
+            officalForum.createTime = result["createTime"].ToString();
+            EventManager.instance.NotifyEvent(Event.GetOfficialForumDetail, true);
+        }
+
+        /// <summary>
+        /// 获取banner列表
+        /// </summary>
+        /// <param name="curPage"></param>
+        /// <param name="pageCount"></param>
+        public void GetBannerList(int curPage, int pageCount)
+        {
+            string url = "http://62.234.108.219/Banner/getList";
+            string lastTime = "";
+            string data = "";
+            if (curPage == 0)
+            {
+                DataManager.instance.bannerList_lastTime = Util.GetTimeStamp();
+                data = "page=" + curPage + "&page_count=" + pageCount;
+            }
+            else
+            {
+                lastTime = DataManager.instance.bannerList_lastTime.ToString();
+                data = "page=" + curPage + "&page_count=" + pageCount + "&last_time=" + lastTime;
+            }
+            StartCoroutine(Post(url, data, OnGetBannerList));
+        }
+
+        /// <summary>
+        /// 获取banner回调
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetBannerList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetBannerList >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetBannerList, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
+            int pageCount = int.Parse(result["page_count"].ToString());
+            JsonData data = result["list"];
+            List<Banner> bannerList = new List<Banner>();
+            for (int i = 0; i < data.Count; i++)
+            {
+                Banner tmp = new Banner();
+                tmp.id = int.Parse(data[i]["id"].ToString());
+                tmp.title = data[i]["title"].ToString();
+                tmp.thumb = data[i]["thumb"].ToString();
+                tmp.createTime = data[i]["create_time"].ToString();
+                bannerList.Add(tmp);
+            }
+            EventManager.instance.NotifyEvent(Event.GetBannerList, true, bannerList, total,page,pageCount);
+        }
+
+        ///// <summary>
+        ///// 获取帖子详情及回帖，回帖按时间倒序
+        ///// </summary>
+        //public void GetDetail(string forunid)
+        //{
+        //    string url = "http://62.234.108.219/Forum/getDetail";
+        //    string data = "forum_id=" + forunid;
+        //    StartCoroutine(Post(url, data, OnGetDetail));
+        //}
+
+        //private void OnGetDetail(JsonData result)
+        //{
+        //    EventManager.instance.NotifyEvent(Event.GetDetail);
+        //}
         #endregion
     }
 }

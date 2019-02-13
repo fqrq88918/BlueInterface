@@ -32,4 +32,14 @@ public class DataManager : Singleton<DataManager> {
     /// </summary>
     public int circleList_lastTime = 0;
 
+    /// <summary>
+    /// 上次获取官方发布列表的时间
+    /// </summary>
+    public int officialList_lastTime = 0;
+
+    /// <summary>
+    /// 上次获取banner列表的时间
+    /// </summary>
+    public int bannerList_lastTime = 0;
+
 }

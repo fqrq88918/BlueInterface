@@ -25,5 +25,11 @@ namespace XMWorkspace
         SetAvatar=17,
         ModifyPassword=18,
         GetBaseInfo=19,
+        CreateForum=20,
+        ReplyForum=21,
+        GetOfficialList=22,
+        CollectForum=23,
+        GetOfficialForumDetail=24,
+        GetBannerList=25,
     }
 }
