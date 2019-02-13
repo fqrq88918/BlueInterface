@@ -4,6 +4,7 @@ using UnityEngine;
 using LitJson;
 using System.IO;
 
+
 namespace XMWorkspace
 {
     public class InterfaceManager : MonoBehaviour
@@ -333,7 +334,7 @@ namespace XMWorkspace
             //只有在首页的时候才会刷新上次请求的时间戳
             if (page == 0)
             {
-                DataManager.instance.orderList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                DataManager.instance.orderList_lastTime = Util.GetTimeStamp();
                 data = "order_type=" + type + "&order_status=" + status + "& page=" + page + "& page_count=" + pageCount + "&search[order_id]=" + searchOrderId;
             }
             else
@@ -540,7 +541,7 @@ namespace XMWorkspace
             //只有在首页的时候才会刷新上次请求的时间戳
             if (curPage == 0)
             {
-                DataManager.instance.areaList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                DataManager.instance.areaList_lastTime = Util.GetTimeStamp();
                 data = "page=" + curPage + "&page_count=" + pageCount;
             }
             else
@@ -596,7 +597,7 @@ namespace XMWorkspace
             //只有在首页的时候才会刷新上次请求的时间戳
             if (curPage == 0)
             {
-                DataManager.instance.collectionList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                DataManager.instance.collectionList_lastTime = Util.GetTimeStamp();
                 data = "page=" + curPage + "&page_count=" + pageCount;
             }
             else
@@ -765,7 +766,7 @@ namespace XMWorkspace
             //只有在首页的时候才会刷新上次请求的时间戳
             if (curPage == 0)
             {
-                DataManager.instance.circleList_lastTime = int.Parse((System.DateTime.Now.Ticks / 10000000).ToString());
+                DataManager.instance.circleList_lastTime = Util.GetTimeStamp();
                 data = "type=" + type + "&page=" + curPage + "&page_count=" + pageCount;
             }
             else
