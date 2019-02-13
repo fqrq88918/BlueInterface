@@ -192,7 +192,7 @@ namespace XMWorkspace
             UserData.instance.point = int.Parse(result["point"].ToString());
             UserData.instance.token = result["token"].ToString();
             UserData.instance.level = int.Parse(result["level"].ToString());
-            UserData.instance.totalSign = int.Parse(result[" totalSign"].ToString());
+            UserData.instance.totalSign = int.Parse(result["totalSign"].ToString());
             EventManager.instance.NotifyEvent(Event.Login, true);
         }
 
@@ -927,6 +927,47 @@ namespace XMWorkspace
                 return;
             }
             EventManager.instance.NotifyEvent(Event.ModifyPassword, true);
+        }
+
+        /// <summary>
+        /// 【获取我的基本信息】 用户已登录用户再次打开APP
+        /// </summary>
+        public void GetBaseInfo()
+        {
+            string url = "http://62.234.108.219/User/getBaseInfo";
+            string data ="" ;
+            StartCoroutine(Post(url, data, OnGetBaseInfo));
+        }
+
+        /// <summary>
+        /// 获取用户基本信息结果
+        /// </summary>
+        /// <param name="result"></param>
+        public void OnGetBaseInfo(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetBaseInfo >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetBaseInfo, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            UserData.instance.id = int.Parse(result["id"].ToString());
+            UserData.instance.name = result["name"].ToString();
+            UserData.instance.phone = result["phone"].ToString();
+            UserData.instance.role = int.Parse(result["role"].ToString());
+            UserData.instance.area = int.Parse(result["area"].ToString());
+            UserData.instance.avatar = result["avatar"].ToString();
+            UserData.instance.coin = int.Parse(result["coin"].ToString());
+            UserData.instance.point = int.Parse(result["point"].ToString());
+            UserData.instance.token = result["token"].ToString();
+            UserData.instance.level = int.Parse(result["level"].ToString());
+            UserData.instance.totalSign = int.Parse(result["totalSign"].ToString());
+            EventManager.instance.NotifyEvent(Event.GetBaseInfo, true);
         }
         #endregion
 

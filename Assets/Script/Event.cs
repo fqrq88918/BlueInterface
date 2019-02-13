@@ -24,5 +24,6 @@ namespace XMWorkspace
         GetLastWeekSign=16,
         SetAvatar=17,
         ModifyPassword=18,
+        GetBaseInfo=19,
     }
 }
