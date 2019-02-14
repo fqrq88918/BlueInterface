@@ -34,5 +34,7 @@ namespace XMWorkspace
         GetForumList=26,
         PlayWithLottery=27,
         GetAwardList=28,
+        GetForemanList=29,
+        SetStar=30,
     }
 }

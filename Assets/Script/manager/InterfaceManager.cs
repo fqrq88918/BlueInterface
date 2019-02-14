@@ -877,7 +877,7 @@ namespace XMWorkspace
         public void SetAvatar(string avatarUrl)
         {
             string url = "http://62.234.108.219/User/setAvatar";
-            string data = "avatar_url="+avatarUrl;
+            string data = "avatar_url=" + avatarUrl;
             StartCoroutine(Post(url, data, OnGetLastWeekSign));
         }
 
@@ -896,16 +896,16 @@ namespace XMWorkspace
                 return;
             }
             EventManager.instance.NotifyEvent(Event.SetAvatar, true);
-           
+
         }
 
-       /// <summary>
-       /// 修改密码
-       /// </summary>
-       /// <param name="phone">手机号</param>
-       /// <param name="code">短信验证码</param>
-       /// <param name="password">密码</param>
-        public void ModifyPassword(string phone, string code ,string password)
+        /// <summary>
+        /// 修改密码
+        /// </summary>
+        /// <param name="phone">手机号</param>
+        /// <param name="code">短信验证码</param>
+        /// <param name="password">密码</param>
+        public void ModifyPassword(string phone, string code, string password)
         {
             string url = "http://62.234.108.219/User/modifyPwd";
             string data = "phone=" + phone + "&sms_code=" + code + "&new_pwd=" + password;
@@ -935,7 +935,7 @@ namespace XMWorkspace
         public void GetBaseInfo()
         {
             string url = "http://62.234.108.219/User/getBaseInfo";
-            string data ="" ;
+            string data = "";
             StartCoroutine(Post(url, data, OnGetBaseInfo));
         }
 
@@ -977,7 +977,7 @@ namespace XMWorkspace
         /// </summary>
         /// <param name="page"></param>
         /// <param name="pageCount"></param>
-        public void GetOfficialList(int curPage,int pageCount)
+        public void GetOfficialList(int curPage, int pageCount)
         {
             string url = "http://62.234.108.219/Official/getList";
             string lastTime = "";
@@ -985,12 +985,12 @@ namespace XMWorkspace
             if (curPage == 0)
             {
                 DataManager.instance.officialList_lastTime = Util.GetTimeStamp();
-                data ="page=" + curPage + "&page_count=" + pageCount;
+                data = "page=" + curPage + "&page_count=" + pageCount;
             }
             else
             {
                 lastTime = DataManager.instance.officialList_lastTime.ToString();
-                data ="page=" + curPage + "&page_count=" + pageCount + "&last_time=" + lastTime;
+                data = "page=" + curPage + "&page_count=" + pageCount + "&last_time=" + lastTime;
             }
             StartCoroutine(Post(url, data, OnGetOfficialList));
         }
@@ -1029,7 +1029,7 @@ namespace XMWorkspace
                 tmp.view = int.Parse(data[i]["view"].ToString());
                 officialForumList.Add(tmp);
             }
-            EventManager.instance.NotifyEvent(Event.GetOfficialList, true,officialForumList,total,page,pageCount);
+            EventManager.instance.NotifyEvent(Event.GetOfficialList, true, officialForumList, total, page, pageCount);
         }
 
         /// <summary>
@@ -1068,10 +1068,10 @@ namespace XMWorkspace
         /// </summary>
         /// <param name="forumId">主贴ID</param>
         /// <param name="content">回复内容,最多140字</param>
-        public void ReplyForum(int forumId,string content)
+        public void ReplyForum(int forumId, string content)
         {
             string url = "http://62.234.108.219/Forum/reply";
-            string data = "forum_id=" + forumId + "&content=" + content ;
+            string data = "forum_id=" + forumId + "&content=" + content;
             StartCoroutine(Post(url, data, OnReplyForum));
         }
 
@@ -1214,7 +1214,7 @@ namespace XMWorkspace
                 tmp.createTime = data[i]["create_time"].ToString();
                 bannerList.Add(tmp);
             }
-            EventManager.instance.NotifyEvent(Event.GetBannerList, true, bannerList, total,page,pageCount);
+            EventManager.instance.NotifyEvent(Event.GetBannerList, true, bannerList, total, page, pageCount);
         }
 
         /// <summary>
@@ -1252,7 +1252,7 @@ namespace XMWorkspace
             forum.view = int.Parse(mainForum["view"].ToString());
             forum.comment = int.Parse(mainForum["comment"].ToString());
             forum.title = mainForum["title"].ToString();
-            forum.content=mainForum["content"].ToString();
+            forum.content = mainForum["content"].ToString();
             forum.userAvatar = mainForum["user_avatar"].ToString();
             forum.uploadImages = JsonMapper.ToObject<List<string>>(mainForum["upload_images"].ToString());
             forum.create_time = mainForum["create_time"].ToString();
@@ -1271,7 +1271,7 @@ namespace XMWorkspace
                 forum.commentList.Add(tmp);
             }
 
-            EventManager.instance.NotifyEvent(Event.GetDetail,true,forum);
+            EventManager.instance.NotifyEvent(Event.GetDetail, true, forum);
         }
 
         /// <summary>
@@ -1284,17 +1284,17 @@ namespace XMWorkspace
         public void GetForumList(int catId, int page, int pageCount, string[] title)
         {
             string url = "http://62.234.108.219/Forum/getForumList";
-            string data = "cat_id="+ catId+"&page="+page+"&page_count="+pageCount;
+            string data = "cat_id=" + catId + "&page=" + page + "&page_count=" + pageCount;
             for (var i = 0; i < title.Length; i++)
             {
                 data += "&search[]=" + title[i];
             }
-            if (page == 0)            
+            if (page == 0)
                 DataManager.instance.forumList_lastTime = Util.GetTimeStamp();
-            
-            else            
+
+            else
                 data += "&last_time=" + DataManager.instance.forumList_lastTime.ToString();
-                      
+
             StartCoroutine(Post(url, data, OnGetForumList));
         }
 
@@ -1334,7 +1334,7 @@ namespace XMWorkspace
                 tmp.catId = int.Parse(data[i]["cat_id"].ToString());
                 forumList.Add(tmp);
             }
-            EventManager.instance.NotifyEvent(Event.GetForumList, true,forumList,total,page,pageCount);
+            EventManager.instance.NotifyEvent(Event.GetForumList, true, forumList, total, page, pageCount);
         }
         #endregion
 
@@ -1370,9 +1370,9 @@ namespace XMWorkspace
             Award award = new Award();
             award.id = int.Parse(result["id"].ToString());
             award.title = result["title"].ToString();
-            award.type =int.Parse(result["type"].ToString());
+            award.type = int.Parse(result["type"].ToString());
             award.price = int.Parse(result["price"].ToString());
-            EventManager.instance.NotifyEvent(Event.PlayWithLottery, true,award);
+            EventManager.instance.NotifyEvent(Event.PlayWithLottery, true, award);
         }
 
         /// <summary>
@@ -1410,7 +1410,87 @@ namespace XMWorkspace
                 tmp.title = result[i]["title"].ToString();
                 DataManager.instance.systemAwardList.Add(tmp);
             }
-            EventManager.instance.NotifyEvent(Event.GetAwardList, true,DataManager.instance.systemAwardList);
+            EventManager.instance.NotifyEvent(Event.GetAwardList, true, DataManager.instance.systemAwardList);
+        }
+        #endregion
+
+        #region 工长排行模块
+        /// <summary>
+        /// 获取工长排行列表
+        /// </summary>
+        /// <param name="searchName">搜索名称</param>
+        public void GetForemanList(string[] searchName)
+        {
+            string url = "http://62.234.108.219/Foreman/getList";
+            string data = "";
+            for (var i = 0; i < searchName.Length; i++)
+            {
+                data += "&search[]=" + searchName[i];
+            }
+            StartCoroutine(Post(url, data, OnGetForemanList));
+        }
+        /// <summary>
+        /// 获取工长列表排行結果
+        /// </summary>
+        private void OnGetForemanList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetForemanList >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetForemanList, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            int total = int.Parse(result["total"].ToString());
+            JsonData data = result["list"];
+            List<Foreman> foremanList = new List<Foreman>();
+            for (var i = 0; i < data.Count; i++)
+            {
+                Foreman tmp = new Foreman();
+                tmp.id = int.Parse(data[i]["id"].ToString());
+                tmp.name = data[i]["name"].ToString();
+                tmp.avatar = data[i]["avatar"].ToString();
+                tmp.role = int.Parse(data[i]["role"].ToString());
+                tmp.area = int.Parse(data[i]["area"].ToString());
+                tmp.star = int.Parse(data[i]["star"].ToString());
+                tmp.qualifiedNum = int.Parse(data[i][" qualified_num"].ToString());
+                tmp.starStatus = int.Parse(data[i]["star_status"].ToString()) == 1;
+                tmp.rank = int.Parse(data[i]["rank"].ToString());
+                tmp.level = int.Parse(data[i]["level"].ToString());
+                foremanList.Add(tmp);
+            }
+            EventManager.instance.NotifyEvent(Event.GetForemanList, true,foremanList,total);
+        }
+
+        /// <summary>
+        /// 【给工长点赞】1天内重复点赞视为取消点赞，系统自动判断
+        /// </summary>
+        /// <param name="foremanId"></param>
+        public void SetStar(int foremanId)
+        {
+            string url = "http://62.234.108.219/Foreman/getList";
+            string data = "foreman_id="+foremanId;        
+            StartCoroutine(Post(url, data, OnSetStar));
+        }
+        /// <summary>
+        /// 点赞结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnSetStar(JsonData result) {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnSetStar >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.SetStar, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.SetStar, true);            
         }
         #endregion
     }
