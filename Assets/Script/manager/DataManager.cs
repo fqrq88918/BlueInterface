@@ -47,4 +47,9 @@ public class DataManager : Singleton<DataManager> {
     /// </summary>
     public int forumList_lastTime = 0;
 
+    /// <summary>
+    /// 系统的奖项列表
+    /// </summary>
+    public List<Award> systemAwardList = new List<Award>();
+
 }

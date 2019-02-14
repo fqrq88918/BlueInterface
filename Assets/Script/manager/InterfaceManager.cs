@@ -1339,7 +1339,79 @@ namespace XMWorkspace
         #endregion
 
         #region 抽奖模块
+        /// <summary>
+        /// 【参与抽奖】奖金立即到帐，需PP可将中奖结果的id与界面中奖项匹配
+        /// </summary>
+        public void PlayWithLottery()
+        {
+            string url = "http://62.234.108.219/Lottery/playWithLottery";
+            string data = "";
+            StartCoroutine(Post(url, data, OnPlayWithLottery));
+        }
 
+        /// <summary>
+        /// 抽奖结果返回
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnPlayWithLottery(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnPlayWithLottery >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.PlayWithLottery, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            Award award = new Award();
+            award.id = int.Parse(result["id"].ToString());
+            award.title = result["title"].ToString();
+            award.type =int.Parse(result["type"].ToString());
+            award.price = int.Parse(result["price"].ToString());
+            EventManager.instance.NotifyEvent(Event.PlayWithLottery, true,award);
+        }
+
+        /// <summary>
+        /// 获取奖项列表
+        /// </summary>
+        public void GetAwardList()
+        {
+            string url = "http://62.234.108.219/LotteryCategory/getList";
+            string data = "";
+            StartCoroutine(Post(url, data, OnGetAwardList));
+        }
+
+        /// <summary>
+        /// 获取奖项列表结果
+        /// </summary>
+        private void OnGetAwardList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetAwardList >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetAwardList, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            DataManager.instance.systemAwardList = new List<Award>();
+            for (var i = 0; i < result.Count; i++)
+            {
+                Award tmp = new Award();
+                tmp.id = int.Parse(result[i]["id"].ToString());
+                tmp.title = result[i]["title"].ToString();
+                DataManager.instance.systemAwardList.Add(tmp);
+            }
+            EventManager.instance.NotifyEvent(Event.GetAwardList, true,DataManager.instance.systemAwardList);
+        }
         #endregion
     }
 }

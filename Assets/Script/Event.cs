@@ -32,5 +32,7 @@ namespace XMWorkspace
         GetOfficialForumDetail=24,
         GetBannerList=25,
         GetForumList=26,
+        PlayWithLottery=27,
+        GetAwardList=28,
     }
 }
