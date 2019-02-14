@@ -600,7 +600,7 @@ namespace XMWorkspace
         /// <param name="pageCount">每页的条目数</param>
         public void GetCollectionList(int curPage, int pageCount)
         {
-            string url = "http://62.234.108.219/Forum/getCollectionList";
+            string url = "http://62.234.108.219/Forum/getCollectList";
             string lastTime = "";
             string data = "";
             //只有在首页的时候才会刷新上次请求的时间戳
@@ -1496,6 +1496,104 @@ namespace XMWorkspace
 
 
         #region 试压模块
+        /// <summary>
+        /// 试压员开始试压
+        /// </summary>
+        /// <param name="param"></param>
+        public void TakeTestPressure(PostTest param)
+        {
+            string url = "http://62.234.108.219/Appointment/takeTest";
+            string data = "pic_entrance=" + param.entrancePic +
+                "&pic_test=" + param.testPic +
+                "&pic_room=" + param.roomPic +
+                "&pic_bedroom=" + param.bedroomPic +
+                "&pic_toilet=" + param.toiletPic +
+                "&pic_kitchen=" + param.kitchenPic +
+                "&pic_balcony=" + param.balconyPic +
+                "&pic_corridor=" + param.corridorPic +
+                "&build_id=" + param.buildId +
+                "&build_name=" + param.buildName +
+                "&build_phone=" + param.buildName +
+                "&test_buy_place=" + param.testBuyPlace +
+                "&test_house_type=" + param.testHouseType +
+                "&test_kitchen_type=" + param.testKitchenType +
+                "&test_toilet_type=" + param.testToiletType +
+                "&test_developer=" + param.testDeveloper +
+                "&test_decoration=" + param.testDecoration +
+                "&test_hvac=" + param.testHvac +
+                "&test_air=" + param.testAir +
+                "&test_product_type=" + param.testProducyType +
+                "&test_length=" + param.testLength +
+                "&test_laying_type=" + param.testLayingType +
+                "&test_pipeline=" + param.testPipeline +
+                "&test_remark=" + param.testRemark +
+                "&test_assess=" + param.testAssess +
+                "&test_compress=" + param.testCompress +
+                "&test_weld=" + param.testWeld +
+                "&test_weld_check=" + param.testWeldCheck +
+                "&test_keep_start=" + param.testKeepStart +
+                "&test_keep_end=" + param.testKeepEnd +
+                "&test_operate_pressure=" + param.testOperatePressure +
+                "&test_check_pressure=" + param.testCheckPressure +
+                "&test_user_id=" + param.testUserId +
+                "&test_notice=" + param.testNotice +
+                "&order_status=" + param.orderStatus 
+                ;
+       
+            StartCoroutine(Post(url, data, OnTakeTestPressure));
+        }
+
+        /// <summary>
+        /// 试压员试压结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnTakeTestPressure(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnTakeTestPressure >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.TakeTest, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.TakeTest, true);
+        }
+        /// <summary>
+        /// 校验安装人是否为系统已有经销商或水工
+        /// </summary>
+        /// <param name="phone"></param>
+        public void CheckBuilderByPhone(string phone)
+        {
+            string url = "http://62.234.108.219/User/checkBuilderByPhone";
+            string data = "phone=" + phone;
+            StartCoroutine(Post(url, data, OnCheckBuilderByPhone));
+        }
+
+        /// <summary>
+        /// 检查安装人员结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnCheckBuilderByPhone(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnCheckBuilderByPhone >>>>error status:" + status);                   
+                EventManager.instance.NotifyEvent(Event.CheckBuilder, false,status);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            Builder builder = new Builder();
+            builder.id = int.Parse(result["id"].ToString());
+            builder.name = (result["name"].ToString());
+            builder.phone = (result["phone"].ToString());
+            builder.role = int.Parse(result["role"].ToString());
+
+            EventManager.instance.NotifyEvent(Event.CheckBuilder, true, builder);
+        }
         #endregion
     }
 }

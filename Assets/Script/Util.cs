@@ -65,11 +65,10 @@ namespace XMWorkspace
                 case -3: msg = "验证码错误"; break;
                 case -4: msg = "TOKEN校验失败"; break;
                 //case 1: msg = "成功"; break;
-                case 2: msg = "内容为空"; break;
+                case 2: msg = "内容为空"; break;                
                 default:msg = "未知错误";break;
             }
             EventManager.instance.NotifyEvent(Event.ShowMessage, msg);
-        }
-
+        }       
     }
 }

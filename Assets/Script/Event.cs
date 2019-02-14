@@ -36,5 +36,7 @@ namespace XMWorkspace
         GetAwardList=28,
         GetForemanList=29,
         SetStar=30,
+        TakeTest=31,
+        CheckBuilder=32,
     }
 }
