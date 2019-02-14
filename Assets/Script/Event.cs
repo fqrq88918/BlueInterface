@@ -38,5 +38,14 @@ namespace XMWorkspace
         SetStar=30,
         TakeTest=31,
         CheckBuilder=32,
+        SetSign=33,
+        CheckSevenSign=34,
+        CheckCreateForum=35,
+        CheckReplyForum=36,
+        CheckSetStar=37,
+        ExchangeGood=38,
+        GetMyExchangeList=39,
+        GetGoodsList=40,
+        GetGoodsDetail=41,
     }
 }

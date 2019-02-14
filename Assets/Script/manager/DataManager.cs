@@ -48,6 +48,16 @@ public class DataManager : Singleton<DataManager> {
     public int forumList_lastTime = 0;
 
     /// <summary>
+    /// 上次获取我的商品兑换列表的时间
+    /// </summary>
+    public int exchangeList_lastTime = 0;
+
+    /// <summary>
+    /// 上次获取商品列表的时间
+    /// </summary>
+    public int goodList_lastTime = 0;
+   
+    /// <summary>
     /// 系统的奖项列表
     /// </summary>
     public List<Award> systemAwardList = new List<Award>();

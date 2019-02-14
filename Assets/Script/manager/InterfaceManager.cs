@@ -1595,5 +1595,350 @@ namespace XMWorkspace
             EventManager.instance.NotifyEvent(Event.CheckBuilder, true, builder);
         }
         #endregion
+
+        #region 任务模块
+        /// <summary>
+        /// 签到
+        /// </summary>
+        public void SetSign()
+        {
+            string url = "http://62.234.108.219/User/setSign";
+            string data = "" ;
+            StartCoroutine(Post(url, data, OnSetSign));
+        }
+
+        /// <summary>
+        /// 签到结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnSetSign(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnSetSign >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.SetSign, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.SetSign, true);
+        }
+
+        /// <summary>
+        /// 检查7天签到
+        /// </summary>
+        public void Check7Sign()
+        {
+            string url = "http://62.234.108.219/User/takeTaskSevenSign";
+            string data = "";
+            StartCoroutine(Post(url, data, OnCheck7Sign));
+        }
+
+        /// <summary>
+        /// 检查7天签到结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnCheck7Sign(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                //没有完成签到不提示错误消息
+                //Debug.LogError("OnCheck7Sign >>>>error status:" + status);
+                //Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.CheckSevenSign, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.CheckSevenSign, true);
+        }
+
+        /// <summary>
+        /// 检查今日发帖任务是否完成
+        /// </summary>
+        public void CheckCreateForum()
+        {
+            string url = "http://62.234.108.219/User/takeTaskSevenSign";
+            string data = "";
+            StartCoroutine(Post(url, data, OnCheckCreateForum));
+        }
+
+        /// <summary>
+        /// 任务完成结果返回
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnCheckCreateForum(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                //没有完成任务不提示错误消息
+                //Debug.LogError("OnCheckCreateForum >>>>error status:" + status);
+                //Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.CheckCreateForum, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.CheckCreateForum, true);
+        }
+
+        /// <summary>
+        /// 检查回帖3次任务是否完成
+        /// </summary>
+        public void CheckReplyForum()
+        {
+            string url = "http://62.234.108.219/Forum/takeTaskReplyForum";
+            string data = "";
+            StartCoroutine(Post(url, data, OnCheckReplyMission));
+        }
+
+        /// <summary>
+        /// 任务检查结果返回
+        /// </summary>
+        private void OnCheckReplyMission(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                //没有完成任务不提示错误消息
+                //Debug.LogError("OnCheckReplyMission >>>>error status:" + status);
+                //Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.CheckReplyForum, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.CheckReplyForum, true);
+        }
+
+        /// <summary>
+        /// 检查点赞任务是否完成
+        /// </summary>
+        public void CheckSetStar()
+        {
+            string url = "http://62.234.108.219/User/takeTaskStar";
+            string data = "";
+            StartCoroutine(Post(url, data, OnCheckSetStar));
+        }
+        /// <summary>
+        /// 任务检查结果返回
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnCheckSetStar(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                //没有完成任务不提示错误消息
+                //Debug.LogError("OnCheckSetStar >>>>error status:" + status);
+                //Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.CheckSetStar, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.CheckSetStar, true);
+        }
+        #endregion
+
+        #region 积分超市
+        /// <summary>
+        /// 兑换商品
+        /// </summary>
+        /// <param name="goodsId">商品Id</param>
+        /// <param name="name">订单姓名</param>
+        /// <param name="address">订单地址</param>
+        /// <param name="phone">联系方式</param>
+        /// <param name="remark">备注</param>
+        public void ExchangeGood(int goodsId, string name,string address,string phone,string remark)
+        {
+            string url = "http://62.234.108.219/Goods/exchange";
+            string data = "goods_id="+goodsId+
+                "&order_name="+name+
+                "order_adress="+address+
+                "order_phone="+phone+
+                "order_remark+"+remark;
+            StartCoroutine(Post(url, data, OnExchangeGood));
+        }
+        /// <summary>
+        /// 商品兑换结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnExchangeGood(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnExchangeGood >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.ExchangeGood, false);
+                return;
+            }
+            EventManager.instance.NotifyEvent(Event.ExchangeGood, true);
+        }
+
+        /// <summary>
+        /// 获取我的兑换商品列表
+        /// </summary>
+        /// <param name="curPage">第几页</param>
+        /// <param name="pageCount">每页多少条</param>
+        public void GetMyExchangeList(int curPage,int pageCount)
+        {
+            string url = "http://62.234.108.219/Goods/getExchangeList";
+            string data = "page=" + curPage +
+                "& page_count=" + pageCount;
+
+            if (curPage == 0)
+                DataManager.instance.exchangeList_lastTime = Util.GetTimeStamp();
+            else
+                data += "&last_time" + DataManager.instance.exchangeList_lastTime.ToString();
+
+            StartCoroutine(Post(url, data, OnGetMyExchangeList));
+        }
+
+        /// <summary>
+        /// 商品兑换列表返回结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetMyExchangeList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetExchangeList >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetMyExchangeList, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
+            int pageCount = int.Parse(result["page_count"].ToString());
+            JsonData data = result["data"];
+            List<HistoryOrder> order = new List<HistoryOrder>();
+            for (var i = 0; i < data.Count; i++)
+            {
+                HistoryOrder tmp = new HistoryOrder();
+                tmp.id = int.Parse(data[i]["id"].ToString());
+                tmp.goodsId = int.Parse(data[i]["goods_id"].ToString());
+                tmp.goodsTitle = data[i]["goods_title"].ToString();
+                tmp.thumb = data[i]["thumb"].ToString();
+                tmp.catId = int.Parse(data[i]["cat_id"].ToString());
+                tmp.price = int.Parse(data[i]["price"].ToString());
+                tmp.name = data[i]["name"].ToString();
+                tmp.address = data[i]["address"].ToString();
+                tmp.phone = data[i]["phone"].ToString();
+                tmp.createTime = data[i]["create_time"].ToString();
+                order.Add(tmp);
+            }
+            EventManager.instance.NotifyEvent(Event.GetMyExchangeList, true,order,total,page,pageCount);
+        }
+
+      /// <summary>
+      ///获取商品列表
+      /// </summary>
+      /// <param name="catId">分类Id</param>
+      /// <param name="curPage">页数</param>
+      /// <param name="pageCount">每页条数</param>
+      /// <param name="isPen">true:上架 false:下架</param>
+        public void GetGoodsList(int catId, int curPage, int pageCount, bool isPen = true)
+        {
+            string url = "http://62.234.108.219/Goods/getList";
+            string data ="cat_id="+catId+
+                "&page=" + curPage +
+                "& page_count=" + pageCount;
+
+            if (isPen)
+                data += "&search[]=1";
+            else
+                data += "&search[]=0";
+         
+            if (curPage == 0)
+                DataManager.instance.goodList_lastTime = Util.GetTimeStamp();
+            else
+                data += "&last_time" + DataManager.instance.goodList_lastTime.ToString();
+
+            StartCoroutine(Post(url, data, OnGetGoodsList));
+        }
+
+        /// <summary>
+        /// 商品兑换列表返回结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetGoodsList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetGoodsList >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetGoodsList, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
+            int pageCount = int.Parse(result["page_count"].ToString());
+            JsonData data = result["data"];
+            List<Good> goodList = new List<Good>();
+            for (var i = 0; i < data.Count; i++)
+            {
+                Good tmp = new Good();
+                tmp.id = int.Parse(data[i]["id"].ToString());
+                tmp.title = data[i]["title"].ToString();
+                tmp.price =int.Parse(data[i]["price"].ToString());
+                tmp.referencePrice = int.Parse(data[i]["reference_price"].ToString());
+                tmp.stock = int.Parse(data[i]["stock"].ToString());
+                tmp.thumb = data[i]["thumb"].ToString();            
+                tmp.details = data[i]["details"].ToString();
+                tmp.catId = int.Parse(data[i]["cat_id"].ToString());
+
+                goodList.Add(tmp);
+            }
+            EventManager.instance.NotifyEvent(Event.GetGoodsList, true, goodList, total, page, pageCount);
+        }
+
+        /// <summary>
+        /// 获取商品详情
+        /// </summary>
+        /// <param name="goodsId">商品Id</param>
+        public void GetGoodsDetail(int goodsId)
+        {
+            string url = "http://62.234.108.219/Goods/getDetail";
+            string data = "goods_id=" + goodsId;                       
+            StartCoroutine(Post(url, data, OnGetGoodsDetail));
+        }
+
+        /// <summary>
+        /// 商品详情获取结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetGoodsDetail(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetGoodsDetail >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetGoodsDetail, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+
+            Good good = new Good();
+            good.id = int.Parse(result["id"].ToString());
+            good.title =result["title"].ToString();
+            good.price = int.Parse(result["price"].ToString());
+            good.referencePrice = int.Parse(result["reference_price"].ToString());
+            good.stock = int.Parse(result["stock"].ToString());
+            good.thumb = result["thumb"].ToString();
+            good.details = result["details"].ToString();
+            good.catId = int.Parse(result["cat_id"].ToString());
+            good.isOpen = int.Parse(result["is_open"].ToString()) == 1;
+
+            EventManager.instance.NotifyEvent(Event.GetGoodsDetail, true,good);
+
+        }
+        #endregion
     }
 }
