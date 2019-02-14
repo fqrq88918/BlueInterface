@@ -423,8 +423,8 @@ namespace XMWorkspace
                 order.testCompress = data[i]["c_test_compress"].ToString();
                 order.testWeld = data[i]["c_test_weld"].ToString();
                 order.testWeldCheck = data[i]["c_test_weld_check"].ToString();
-                order.testKeepStart = data[i]["c_test_kepp_start"].ToString();
-                order.testKeepEnd = data[i]["c_test_kepp_end"].ToString();
+                order.testKeepStart = data[i]["c_test_keep_start"].ToString();
+                order.testKeepEnd = data[i]["c_test_keep_end"].ToString();
                 order.testOperatePressure = data[i]["c_test_operate_pressure"].ToString();
                 order.testCheckPressure = data[i]["c_test_check_pressure"].ToString();
                 order.testUserId = data[i]["c_test_user_id"].ToString();
