@@ -31,5 +31,6 @@ namespace XMWorkspace
         CollectForum=23,
         GetOfficialForumDetail=24,
         GetBannerList=25,
+        GetForumList=26,
     }
 }

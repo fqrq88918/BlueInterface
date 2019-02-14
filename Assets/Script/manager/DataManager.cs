@@ -42,4 +42,9 @@ public class DataManager : Singleton<DataManager> {
     /// </summary>
     public int bannerList_lastTime = 0;
 
+    /// <summary>
+    /// 上次获取论坛帖子的时间
+    /// </summary>
+    public int forumList_lastTime = 0;
+
 }

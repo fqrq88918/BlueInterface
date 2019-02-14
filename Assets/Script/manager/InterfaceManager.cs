@@ -1217,20 +1217,129 @@ namespace XMWorkspace
             EventManager.instance.NotifyEvent(Event.GetBannerList, true, bannerList, total,page,pageCount);
         }
 
-        ///// <summary>
-        ///// 获取帖子详情及回帖，回帖按时间倒序
-        ///// </summary>
-        //public void GetDetail(string forunid)
-        //{
-        //    string url = "http://62.234.108.219/Forum/getDetail";
-        //    string data = "forum_id=" + forunid;
-        //    StartCoroutine(Post(url, data, OnGetDetail));
-        //}
+        /// <summary>
+        /// 获取帖子详情及回帖，回帖按时间倒序
+        /// </summary>
+        public void GetDetail(int forunid)
+        {
+            string url = "http://62.234.108.219/Forum/getDetail";
+            string data = "forum_id=" + forunid;
+            StartCoroutine(Post(url, data, OnGetDetail));
+        }
+        /// <summary>
+        /// 获取帖子详情结果返回
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetDetail(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetDetail >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetDetail, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
 
-        //private void OnGetDetail(JsonData result)
-        //{
-        //    EventManager.instance.NotifyEvent(Event.GetDetail);
-        //}
+            Forum forum = new Forum();
+            JsonData mainForum = result["mainForum"];
+            forum.id = int.Parse(mainForum["id"].ToString());
+            forum.catId = int.Parse(mainForum["cat_id"].ToString());
+            forum.userId = int.Parse(mainForum["user_id"].ToString());
+            forum.view = int.Parse(mainForum["view"].ToString());
+            forum.comment = int.Parse(mainForum["comment"].ToString());
+            forum.title = mainForum["title"].ToString();
+            forum.content=mainForum["content"].ToString();
+            forum.userAvatar = mainForum["user_avatar"].ToString();
+            forum.uploadImages = JsonMapper.ToObject<List<string>>(mainForum["upload_images"].ToString());
+            forum.create_time = mainForum["create_time"].ToString();
+            forum.userName = mainForum["user_name"].ToString();
+
+            JsonData subForum = result["subForum"];
+            for (var i = 0; i < subForum.Count; i++)
+            {
+                Comment tmp = new Comment();
+                tmp.id = int.Parse(subForum[i]["id"].ToString());
+                tmp.content = subForum[i]["content"].ToString();
+                tmp.userId = int.Parse(subForum[i]["user_id"].ToString());
+                tmp.userName = subForum[i]["user_name"].ToString();
+                tmp.userAvatar = subForum[i]["user_avatar"].ToString();
+                tmp.createTime = subForum[i]["create_time"].ToString();
+                forum.commentList.Add(tmp);
+            }
+
+            EventManager.instance.NotifyEvent(Event.GetDetail,true,forum);
+        }
+
+        /// <summary>
+        /// 【获取论坛帖子（主贴）列表】含搜索
+        /// </summary>
+        /// <param name="cat_id">获取的指定版块id，0为全部，1为动态分享，2为工艺展示，3为寻找工友，4为问题咨询</param>
+        /// <param name="page">页数</param>
+        /// <param name="pageCount">每页条数</param>
+        /// <param name="title">搜索标题数组</param>
+        public void GetForumList(int catId, int page, int pageCount, string[] title)
+        {
+            string url = "http://62.234.108.219/Forum/getForumList";
+            string data = "cat_id="+ catId+"&page="+page+"&page_count="+pageCount;
+            for (var i = 0; i < title.Length; i++)
+            {
+                data += "&search[]=" + title[i];
+            }
+            if (page == 0)            
+                DataManager.instance.forumList_lastTime = Util.GetTimeStamp();
+            
+            else            
+                data += "&last_time=" + DataManager.instance.forumList_lastTime.ToString();
+                      
+            StartCoroutine(Post(url, data, OnGetForumList));
+        }
+
+        /// <summary>
+        /// 获取论坛帖子结果
+        /// </summary>
+        /// <param name="result"></param>
+        private void OnGetForumList(JsonData result)
+        {
+            int status = int.Parse(result["status"].ToString());
+            if (status != 1)
+            {
+                Debug.LogError("OnGetForumList >>>>error status:" + status);
+                Util.ShowErrorMessage(status);
+                EventManager.instance.NotifyEvent(Event.GetForumList, false);
+                return;
+            }
+            result = result["data"];
+            if (result == null)
+                return;
+            int total = int.Parse(result["total"].ToString());
+            int page = int.Parse(result["page"].ToString());
+            int pageCount = int.Parse(result["page_count"].ToString());
+
+            JsonData data = result["list"];
+            List<Forum> forumList = new List<Forum>();
+            for (var i = 0; i < data.Count; i++)
+            {
+                Forum tmp = new Forum();
+                tmp.id = int.Parse(data[i]["id"].ToString());
+                tmp.userName = data[i]["user_name"].ToString();
+                tmp.userAvatar = data[i]["user_avatar"].ToString();
+                tmp.create_time = data[i]["create_time"].ToString();
+                tmp.title = data[i]["title"].ToString();
+                tmp.view = int.Parse(data[i]["view"].ToString());
+                tmp.comment = int.Parse(data[i]["comment"].ToString());
+                tmp.catId = int.Parse(data[i]["cat_id"].ToString());
+                forumList.Add(tmp);
+            }
+            EventManager.instance.NotifyEvent(Event.GetForumList, true,forumList,total,page,pageCount);
+        }
+        #endregion
+
+        #region 抽奖模块
+
         #endregion
     }
 }
