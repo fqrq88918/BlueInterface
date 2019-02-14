@@ -1493,5 +1493,9 @@ namespace XMWorkspace
             EventManager.instance.NotifyEvent(Event.SetStar, true);            
         }
         #endregion
+
+
+        #region 试压模块
+        #endregion
     }
 }
