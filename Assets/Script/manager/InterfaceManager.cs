@@ -1287,11 +1287,10 @@ namespace XMWorkspace
             string data = "cat_id=" + catId + "&page=" + page + "&page_count=" + pageCount;
             for (var i = 0; i < title.Length; i++)
             {
-                data += "&search[]=" + title[i];
+                data += "&search[title]=" + title[i];
             }
             if (page == 0)
                 DataManager.instance.forumList_lastTime = Util.GetTimeStamp();
-
             else
                 data += "&last_time=" + DataManager.instance.forumList_lastTime.ToString();
 
@@ -1425,7 +1424,7 @@ namespace XMWorkspace
             string data = "";
             for (var i = 0; i < searchName.Length; i++)
             {
-                data += "&search[]=" + searchName[i];
+                data += "&search[name]=" + searchName[i];
             }
             StartCoroutine(Post(url, data, OnGetForemanList));
         }
@@ -1845,9 +1844,9 @@ namespace XMWorkspace
                 "& page_count=" + pageCount;
 
             if (isPen)
-                data += "&search[]=1";
+                data += "&search[is_pen]=1";
             else
-                data += "&search[]=0";
+                data += "&search[is_pen]=0";
          
             if (curPage == 0)
                 DataManager.instance.goodList_lastTime = Util.GetTimeStamp();
