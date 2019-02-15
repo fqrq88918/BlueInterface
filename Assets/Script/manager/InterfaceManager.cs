@@ -76,33 +76,34 @@ namespace XMWorkspace
         /// <param name="filePath"></param>
         /// <param name="callBack"></param>
         /// <returns></returns>
-        IEnumerator PostImage(string filePath, string fileName, string mimeType, System.Action<JsonData> callBack = null)
-        {
-            string url = "http://62.234.108.219/UserUpload/upLoadImg";
+		public IEnumerator PostImage(string filePath, string fileName, string typeName,string mimeType, System.Action<JsonData> callBack = null)
+		{
+			string url = "http://62.234.108.219/UserUpload/upLoadImg";
 
-            WWWForm form = new WWWForm();
-            form.AddField("OSTOKEN", UserData.instance.token);
-            //  form.AddBinaryData("tempImg", FileContent(filePath), "1.jpg", "image/jpg");
-            form.AddBinaryData("tempImg", FileContent(filePath), fileName, mimeType);
+			WWWForm form = new WWWForm();
+			form.AddField("OSTOKEN", UserData.instance.token);
+			//  form.AddBinaryData("tempImg", FileContent(filePath), "1.jpg", "image/jpg");
+			form.AddBinaryData("tempImg", FileContent(filePath), fileName, mimeType);
+			form.AddField ("param", typeName);
 
-            WWW _www = new WWW(url, form);
-            yield return _www;
+			WWW _www = new WWW(url, form);
+			yield return _www;
 
-            if (_www.error != null)
-            {
-                Debug.LogError(_www.error);
-                yield return _www.error;
-            }
-            else
-            {
-                print(_www.text);
-                if (callBack != null)
-                {
-                    JsonData jobject = JsonMapper.ToObject(_www.text);
-                    callBack(jobject);
-                }
-            }
-        }
+			if (_www.error != null)
+			{
+				Debug.LogError(_www.error);
+				yield return _www.error;
+			}
+			else
+			{
+				print(_www.text);
+				if (callBack != null)
+				{
+					JsonData jobject = JsonMapper.ToObject(_www.text);
+					callBack(jobject);
+				}
+			}
+		}
 
 
         #region 注册登录模块
